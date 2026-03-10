@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "SmartBiz ERP API",
+    "description": "API collection for SmartBiz ERP Lite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@smartbiz.com\",\n    \"password\": \"admin123\",\n    \"role\": \"ADMIN\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@smartbiz.com\",\n    \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Businesses",
+      "item": [
+        {
+          "name": "Create Business",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Tech Corp\",\n    \"currency\": \"USD\",\n    \"status\": \"ACTIVE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/businesses", "host": ["{{baseUrl}}"], "path": ["api", "businesses"] }
+          }
+        },
+        {
+          "name": "Get All Businesses",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/businesses", "host": ["{{baseUrl}}"], "path": ["api", "businesses"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Record Stock IN",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"businessId\": 1,\n    \"warehouseId\": 1,\n    \"productId\": 1,\n    \"quantity\": 100,\n    \"type\": \"IN\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/inventory/movement", "host": ["{{baseUrl}}"], "path": ["api", "inventory", "movement"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"businessId\": 1,\n    \"customerId\": 1,\n    \"warehouseId\": 1,\n    \"items\": [\n        {\n            \"productId\": 1,\n            \"description\": \"Laptop\",\n            \"quantity\": 2\n        }\n    ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/invoices", "host": ["{{baseUrl}}"], "path": ["api", "invoices"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" }
+  ]
+}
