@@ -1,9 +1,16 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const getNavClass = ({ isActive }) =>
     `nav-item${isActive ? ' active' : ''}`;
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
 
   return (
     <aside className="sidebar">
@@ -22,27 +29,27 @@ const Sidebar = () => {
         <NavLink to="/customers" className={getNavClass}>
           <span className="nav-icon">👥</span> Customers
         </NavLink>
-        <a href="#" className="nav-item">
+        <NavLink to="/invoices" className={getNavClass}>
           <span className="nav-icon">📄</span> Invoices
-        </a>
-        <a href="#" className="nav-item">
+        </NavLink>
+        <NavLink to="/ledger" className={getNavClass}>
           <span className="nav-icon">📘</span> Ledger
-        </a>
-        <a href="#" className="nav-item">
+        </NavLink>
+        <NavLink to="/reports" className={getNavClass}>
           <span className="nav-icon">📊</span> Reports
-        </a>
-        <a href="#" className="nav-item">
+        </NavLink>
+        <NavLink to="/assistant" className={getNavClass}>
           <span className="nav-icon">🤖</span> AI Assistant
-        </a>
-        <a href="#" className="nav-item">
+        </NavLink>
+        <NavLink to="/settings" className={getNavClass}>
           <span className="nav-icon">⚙️</span> Settings
-        </a>
+        </NavLink>
       </nav>
 
       <div className="sidebar-footer">
-        <a href="#" className="nav-item logout">
+        <button type="button" className="nav-item logout" onClick={handleLogout}>
           <span className="nav-icon">🚪</span> Logout
-        </a>
+        </button>
       </div>
     </aside>
   );

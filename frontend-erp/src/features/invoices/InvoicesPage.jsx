@@ -1,0 +1,323 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import CreateInvoiceModal from './CreateInvoiceModal';
+import '../products/ProductsPage.css';
+import './InvoicesPage.css';
+
+const API_BASE = 'http://localhost:8080';
+
+const InvoicesPage = () => {
+  const [invoices, setInvoices] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [warehouseId, setWarehouseId] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [modalError, setModalError] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const token = localStorage.getItem('token');
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user'));
+    } catch {
+      return null;
+    }
+  })();
+
+  const businessId = user?.businessId;
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      if (!token || !businessId) {
+        setError('Missing authentication information. Please sign in again.');
+        return;
+      }
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const [invRes, custRes, prodRes, invBalRes] = await Promise.all([
+          fetch(`${API_BASE}/api/invoices/business/${businessId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+          fetch(`${API_BASE}/api/customers/business/${businessId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+          fetch(`${API_BASE}/api/products/business/${businessId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+          fetch(`${API_BASE}/api/inventory/balances/business/${businessId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        ]);
+
+        const [invData, custData, prodData, invBalData] = await Promise.all([
+          invRes.json(),
+          custRes.json(),
+          prodRes.json(),
+          invBalRes.json(),
+        ]);
+
+        if (!invRes.ok || !invData.success) {
+          throw new Error(invData.message || 'Failed to load invoices.');
+        }
+        if (!custRes.ok || !custData.success) {
+          throw new Error(custData.message || 'Failed to load customers.');
+        }
+        if (!prodRes.ok || !prodData.success) {
+          throw new Error(prodData.message || 'Failed to load products.');
+        }
+
+        setInvoices(invData.data || []);
+        setCustomers(custData.data || []);
+        setProducts(prodData.data || []);
+
+        if (invBalRes.ok && invBalData.success && invBalData.data?.length) {
+          const first = invBalData.data[0];
+          setWarehouseId(first.warehouseId);
+        } else {
+          setWarehouseId(null);
+        }
+      } catch (e) {
+        setError(e.message || 'Failed to load invoice data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAll();
+  }, [token, businessId]);
+
+  const customerNameById = useMemo(() => {
+    const map = new Map();
+    customers.forEach((c) => map.set(c.id, c.name));
+    return map;
+  }, [customers]);
+
+  const statusOptions = useMemo(() => {
+    const set = new Set();
+    invoices.forEach((inv) => {
+      if (inv.status) set.add(inv.status);
+    });
+    return Array.from(set);
+  }, [invoices]);
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((inv) => {
+      const term = search.toLowerCase();
+      const matchesSearch =
+        !term ||
+        inv.invoiceNumber?.toLowerCase().includes(term) ||
+        customerNameById
+          .get(inv.customerId)
+          ?.toLowerCase()
+          .includes(term);
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (inv.status && inv.status.toLowerCase() === statusFilter.toLowerCase());
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [invoices, search, statusFilter, customerNameById]);
+
+  const handleCreateInvoice = async ({ customerId, items, taxPercent }) => {
+    if (!token || !businessId) {
+      setModalError('Missing authentication information. Please sign in again.');
+      return;
+    }
+
+    if (!customerId) {
+      setModalError('Customer is required.');
+      return;
+    }
+
+    if (!items.length) {
+      setModalError('At least one item is required.');
+      return;
+    }
+
+    const effectiveWarehouseId = warehouseId ?? 1;
+
+    setSaving(true);
+    setModalError('');
+
+    const payload = {
+      businessId,
+      customerId: Number(customerId),
+      warehouseId: effectiveWarehouseId,
+      items: items.map((it) => ({
+        productId: Number(it.productId),
+        quantity: Number(it.quantity),
+        description:
+          products.find((p) => p.id === Number(it.productId))?.name || '',
+      })),
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/invoices`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setModalError(data.message || 'Failed to create invoice.');
+        return;
+      }
+
+      setInvoices((prev) => [data.data, ...prev]);
+      setShowModal(false);
+    } catch (e) {
+      setModalError('Network error while creating invoice.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const formatDate = (value) => {
+    if (!value) return '';
+    try {
+      return new Date(value).toISOString().slice(0, 10);
+    } catch {
+      return '';
+    }
+  };
+
+  return (
+    <div className="products-page invoices-page">
+      <div className="products-header">
+        <div>
+          <h1 className="page-title">Sales &amp; Invoices</h1>
+          <p className="page-subtitle">
+            Track issued invoices and their payment status.
+          </p>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowModal(true)}
+        >
+          + Create Invoice
+        </button>
+      </div>
+
+      <div className="products-toolbar invoices-toolbar">
+        <div className="products-search">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search invoices..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="products-filters">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            {statusOptions.map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {error && <div className="page-error">{error}</div>}
+
+      <div className="products-table-wrapper">
+        {loading ? (
+          <div className="loading-state">Loading invoices...</div>
+        ) : filteredInvoices.length === 0 ? (
+          <div className="empty-state">No invoices found.</div>
+        ) : (
+          <table className="products-table invoices-table">
+            <thead>
+              <tr>
+                <th>Invoice</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInvoices.map((inv) => (
+                <tr key={inv.id}>
+                  <td className="cell-name">{inv.invoiceNumber}</td>
+                  <td>{customerNameById.get(inv.customerId) || '—'}</td>
+                  <td>{formatDate(inv.createdAt)}</td>
+                  <td>{`Rs. ${Number(inv.totalAmount ?? 0).toLocaleString()}`}</td>
+                  <td>
+                    <span
+                      className={`status-pill ${
+                        inv.status && inv.status.toLowerCase() === 'paid'
+                          ? 'paid'
+                          : 'unpaid'
+                      }`}
+                    >
+                      {inv.status}
+                    </span>
+                  </td>
+                  <td className="cell-actions">
+                    <button className="icon-button" title="View">
+                      👁️
+                    </button>
+                    <button className="icon-button" title="Mark paid">
+                      ✔️
+                    </button>
+                    <button className="icon-button" title="Download">
+                      ⬇️
+                    </button>
+                    <button className="icon-button danger" title="Delete">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <CreateInvoiceModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={handleCreateInvoice}
+        loading={saving}
+        error={modalError}
+        customers={customers}
+        products={products}
+      />
+    </div>
+  );
+};
+
+export default InvoicesPage;
+

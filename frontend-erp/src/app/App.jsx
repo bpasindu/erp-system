@@ -4,6 +4,11 @@ import Page1 from '../pages/Page1/Page1';
 import Page2 from '../pages/Page2/Page2';
 import Page3 from '../pages/Page3/Page3';
 import Page4 from '../pages/Page4/Page4';
+import Page5 from '../pages/Page5/Page5';
+import Page6 from '../pages/Page6/Page6';
+import Page7 from '../pages/Page7/Page7';
+import Page8 from '../pages/Page8/Page8';
+import Page9 from '../pages/Page9/Page9';
 
 function App() {
   return (
@@ -13,6 +18,11 @@ function App() {
         <Route path="/home" element={<Page2 />} />
         <Route path="/products" element={<Page3 />} />
         <Route path="/customers" element={<Page4 />} />
+        <Route path="/invoices" element={<Page5 />} />
+        <Route path="/ledger" element={<Page6 />} />
+        <Route path="/reports" element={<Page7 />} />
+        <Route path="/assistant" element={<Page8 />} />
+        <Route path="/settings" element={<Page9 />} />
       </Routes>
     </>
   );
