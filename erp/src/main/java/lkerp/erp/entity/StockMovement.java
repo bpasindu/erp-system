@@ -28,8 +28,12 @@ public class StockMovement {
     private Product product;
 
     private Integer quantity;
-    
-    private String type; // IN, OUT
+
+    private String type; // IN, OUT (STOCK_IN mapped as IN)
+
+    @ManyToOne
+    @JoinColumn(name = "batch_id")
+    private Batch batch;
 
     @Column(name = "movement_date")
     @Builder.Default

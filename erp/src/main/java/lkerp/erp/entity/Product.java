@@ -31,6 +31,9 @@ public class Product {
     private BigDecimal price;
     private BigDecimal cost;
 
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
+
     @Column(name = "created_at")
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

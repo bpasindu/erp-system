@@ -1,0 +1,198 @@
+.reports-page {
+  padding-top: 1.75rem;
+}
+
+.reports-tabs {
+  display: inline-flex;
+  background: #e5e7eb;
+  border-radius: 999px;
+  padding: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.reports-tab {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.reports-tab.active {
+  background: #ffffff;
+  color: #111827;
+}
+
+.export-btn {
+  padding-inline: 0.9rem;
+}
+
+.report-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.reports-content {
+  margin-top: 0.5rem;
+}
+
+/* Sales tab */
+.weekly-sales-chart {
+  margin-top: 0.75rem;
+  height: 260px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: #f9fafb;
+}
+
+.weekly-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.weekly-bar {
+  width: 60%;
+  background: #2563eb;
+  border-radius: 0.4rem 0.4rem 0 0;
+}
+
+.weekly-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Profit tab */
+.profit-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.profit-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pie-chart {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: conic-gradient(#22c55e 0 220deg, #2563eb 220deg 360deg);
+}
+
+.pie-income,
+.pie-expense {
+  display: none;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.income-label {
+  color: #2563eb;
+}
+
+.expense-label {
+  color: #22c55e;
+}
+
+.profit-summary-card .profit-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  display: block;
+}
+
+.summary-income {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.summary-expense {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.summary-net {
+  color: #111827;
+  font-weight: 700;
+}
+
+/* Best sellers tab */
+.best-sellers-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.best-seller-row {
+  display: grid;
+  grid-template-columns: 2.2fr 3fr 0.5fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.best-seller-name {
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.best-seller-bar-wrapper {
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  height: 8px;
+}
+
+.best-seller-bar {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 999px;
+}
+
+.best-seller-value {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Balances tab */
+.balances-table .balance-amount {
+  color: #dc2626;
+}
+
+@media (max-width: 1024px) {
+  .profit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+

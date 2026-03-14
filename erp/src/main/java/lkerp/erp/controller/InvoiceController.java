@@ -34,6 +34,13 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Invoices retrieved", invoiceService.getInvoicesByBusiness(businessId)));
     }
 
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<InvoiceDTO.Response>> updateInvoiceStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return ResponseEntity.ok(ApiResponse.success("Invoice status updated", invoiceService.updateInvoiceStatus(id, status)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteInvoice(@PathVariable Long id) {
         invoiceService.deleteInvoice(id);

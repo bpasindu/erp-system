@@ -1,6 +1,8 @@
 package lkerp.erp.service.impl;
 
+import lkerp.erp.dto.AddStockRequestDTO;
 import lkerp.erp.dto.InventoryDTO;
+import lkerp.erp.entity.Batch;
 import lkerp.erp.entity.Business;
 import lkerp.erp.entity.InventoryBalance;
 import lkerp.erp.entity.Product;
@@ -8,6 +10,7 @@ import lkerp.erp.entity.StockMovement;
 import lkerp.erp.entity.Warehouse;
 import lkerp.erp.exception.BadRequestException;
 import lkerp.erp.exception.ResourceNotFoundException;
+import lkerp.erp.repository.BatchRepository;
 import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.repository.InventoryBalanceRepository;
 import lkerp.erp.repository.ProductRepository;
@@ -29,6 +32,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final StockMovementRepository stockMovementRepository;
     private final InventoryBalanceRepository inventoryBalanceRepository;
+    private final BatchRepository batchRepository;
     private final BusinessRepository businessRepository;
     private final WarehouseRepository warehouseRepository;
     private final ProductRepository productRepository;
@@ -98,6 +102,91 @@ public class InventoryServiceImpl implements InventoryService {
                 .quantity(saved.getQuantity())
                 .type(saved.getType())
                 .movementDate(saved.getMovementDate())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public InventoryDTO.AddStockResponse addStock(AddStockRequestDTO request) {
+        if (request.getQuantity() == null || request.getQuantity() <= 0) {
+            throw new BadRequestException("Quantity must be greater than 0");
+        }
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + request.getWarehouseId()));
+        Business business = product.getBusiness();
+        if (warehouse.getBusiness() == null || !warehouse.getBusiness().getId().equals(business.getId())) {
+            throw new BadRequestException("Warehouse does not belong to the product's business");
+        }
+
+        // Find or create batch
+        Batch batch = batchRepository
+                .findByProductAndWarehouseAndBatchNumber(product, warehouse, request.getBatchNumber())
+                .orElseGet(() -> {
+                    Batch newBatch = Batch.builder()
+                            .business(business)
+                            .warehouse(warehouse)
+                            .product(product)
+                            .batchNumber(request.getBatchNumber())
+                            .quantity(0)
+                            .costPrice(request.getCostPrice())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    return batchRepository.save(newBatch);
+                });
+
+        int qty = request.getQuantity();
+        batch.setQuantity(batch.getQuantity() == null ? qty : batch.getQuantity() + qty);
+        if (request.getCostPrice() != null) {
+            batch.setCostPrice(request.getCostPrice());
+        }
+        batchRepository.save(batch);
+
+        // Create stock movement (STOCK_IN -> type IN)
+        StockMovement movement = StockMovement.builder()
+                .business(business)
+                .warehouse(warehouse)
+                .product(product)
+                .quantity(qty)
+                .type("IN")
+                .batch(batch)
+                .movementDate(LocalDateTime.now())
+                .build();
+        StockMovement savedMovement = stockMovementRepository.save(movement);
+
+        // Update or create inventory balance (warehouse level)
+        Optional<InventoryBalance> balanceOpt = inventoryBalanceRepository
+                .findByBusinessAndWarehouseAndProduct(business, warehouse, product);
+        InventoryBalance balance;
+        if (balanceOpt.isPresent()) {
+            balance = balanceOpt.get();
+            balance.setQuantity(balance.getQuantity() + qty);
+        } else {
+            balance = InventoryBalance.builder()
+                    .business(business)
+                    .warehouse(warehouse)
+                    .product(product)
+                    .quantity(qty)
+                    .build();
+        }
+        inventoryBalanceRepository.save(balance);
+        int newWarehouseBalance = balance.getQuantity();
+
+        // Update product total quantity
+        int currentTotal = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
+        product.setStockQuantity(currentTotal + qty);
+        productRepository.save(product);
+        int newProductTotal = product.getStockQuantity();
+
+        return InventoryDTO.AddStockResponse.builder()
+                .movementId(savedMovement.getId())
+                .batchId(batch.getId())
+                .productId(product.getId())
+                .warehouseId(warehouse.getId())
+                .quantityAdded(qty)
+                .newWarehouseBalance(newWarehouseBalance)
+                .newProductTotalQuantity(newProductTotal)
                 .build();
     }
 

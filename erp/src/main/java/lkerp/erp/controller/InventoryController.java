@@ -1,6 +1,7 @@
 package lkerp.erp.controller;
 
 import jakarta.validation.Valid;
+import lkerp.erp.dto.AddStockRequestDTO;
 import lkerp.erp.dto.ApiResponse;
 import lkerp.erp.dto.InventoryDTO;
 import lkerp.erp.service.InventoryService;
@@ -17,6 +18,13 @@ import java.util.List;
 public class InventoryController {
 
     private final InventoryService inventoryService;
+
+    @PostMapping("/add-stock")
+    public ResponseEntity<ApiResponse<InventoryDTO.AddStockResponse>> addStock(
+            @Valid @RequestBody AddStockRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Stock added successfully", inventoryService.addStock(request)));
+    }
 
     @PostMapping("/movement")
     public ResponseEntity<ApiResponse<InventoryDTO.StockMovementResponse>> recordMovement(

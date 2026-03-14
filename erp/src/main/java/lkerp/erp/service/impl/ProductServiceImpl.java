@@ -35,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
         }
 
+        int initialStock = request.getStockQuantity() != null ? request.getStockQuantity() : 0;
         Product product = Product.builder()
                 .business(business)
                 .category(category)
@@ -43,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .cost(request.getCost())
+                .stockQuantity(initialStock)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -82,6 +84,9 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setCost(request.getCost());
+        if (request.getStockQuantity() != null) {
+            product.setStockQuantity(request.getStockQuantity());
+        }
 
         Product updated = productRepository.save(product);
         return mapToResponse(updated);
@@ -105,6 +110,7 @@ public class ProductServiceImpl implements ProductService {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .cost(product.getCost())
+                .stockQuantity(product.getStockQuantity())  
                 .createdAt(product.getCreatedAt())
                 .build();
     }
