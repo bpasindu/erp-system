@@ -17,6 +17,7 @@ import lkerp.erp.repository.ProductRepository;
 import lkerp.erp.repository.StockMovementRepository;
 import lkerp.erp.repository.WarehouseRepository;
 import lkerp.erp.service.InventoryService;
+import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final BusinessRepository businessRepository;
     private final WarehouseRepository warehouseRepository;
     private final ProductRepository productRepository;
+    private final UsageLogService usageLogService;
 
     @Override
     @Transactional
@@ -178,6 +180,8 @@ public class InventoryServiceImpl implements InventoryService {
         product.setStockQuantity(currentTotal + qty);
         productRepository.save(product);
         int newProductTotal = product.getStockQuantity();
+
+        usageLogService.log(business.getId(), null, "ADD_STOCK", "Added " + qty + " units of " + product.getName() + " to warehouse ID " + warehouse.getId());
 
         return InventoryDTO.AddStockResponse.builder()
                 .movementId(savedMovement.getId())
