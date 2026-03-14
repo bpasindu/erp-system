@@ -36,6 +36,9 @@ public class ProductDTO {
         @NotNull(message = "Cost is required")
         @PositiveOrZero(message = "Cost must be positive or zero")
         private BigDecimal cost;
+
+        @PositiveOrZero(message = "Stock quantity must be positive or zero")
+        private Integer stockQuantity;
     }
 
     @Data
@@ -51,6 +54,7 @@ public class ProductDTO {
         private String description;
         private BigDecimal price;
         private BigDecimal cost;
+        private Integer stockQuantity;
         private LocalDateTime createdAt;
     }
 }

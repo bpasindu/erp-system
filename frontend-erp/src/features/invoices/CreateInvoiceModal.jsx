@@ -8,12 +8,15 @@ const CreateInvoiceModal = ({
   onSave,
   loading,
   error,
-  customers,
-  products,
+  customers = [],
+  products = [],
 }) => {
   const [customerId, setCustomerId] = useState('');
   const [items, setItems] = useState([emptyItem]);
   const [taxPercent, setTaxPercent] = useState(10);
+
+  const safeCustomers = Array.isArray(customers) ? customers : [];
+  const safeProducts = Array.isArray(products) ? products : [];
 
   useEffect(() => {
     if (isOpen) {
@@ -25,11 +28,23 @@ const CreateInvoiceModal = ({
 
   const productMap = useMemo(() => {
     const map = new Map();
-    products.forEach((p) => map.set(p.id, p));
+    safeProducts.forEach((p) => map.set(p.id, p));
     return map;
-  }, [products]);
+  }, [safeProducts]);
 
-  if (!isOpen) return null;
+  const totals = useMemo(() => {
+    const subtotal = items.reduce((sum, item) => {
+      const product = productMap.get(Number(item.productId));
+      const price = product ? Number(product.price ?? 0) : 0;
+      const qty = Number(item.quantity || 0);
+      return sum + price * qty;
+    }, 0);
+
+    const tax = (subtotal * Number(taxPercent || 0)) / 100;
+    const total = subtotal + tax;
+
+    return { subtotal, tax, total };
+  }, [items, taxPercent, productMap]);
 
   const handleItemChange = (index, field, value) => {
     setItems((prev) =>
@@ -47,20 +62,6 @@ const CreateInvoiceModal = ({
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const totals = useMemo(() => {
-    const subtotal = items.reduce((sum, item) => {
-      const product = productMap.get(Number(item.productId));
-      const price = product ? Number(product.price ?? 0) : 0;
-      const qty = Number(item.quantity || 0);
-      return sum + price * qty;
-    }, 0);
-
-    const tax = (subtotal * Number(taxPercent || 0)) / 100;
-    const total = subtotal + tax;
-
-    return { subtotal, tax, total };
-  }, [items, taxPercent, productMap]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({
@@ -70,9 +71,11 @@ const CreateInvoiceModal = ({
     });
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="modal-overlay">
-      <div className="product-modal" style={{ maxWidth: '760px', width: '100%' }}>
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="product-modal" style={{ maxWidth: '760px', width: '100%' }} onClick={(e) => e.stopPropagation()}>
         <div className="product-modal-header">
           <h2>Create Invoice</h2>
           <button className="modal-close" onClick={onClose} aria-label="Close">
@@ -97,7 +100,7 @@ const CreateInvoiceModal = ({
               }}
             >
               <option value="">Select customer</option>
-              {customers.map((c) => (
+              {safeCustomers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -124,7 +127,7 @@ const CreateInvoiceModal = ({
                       }
                     >
                       <option value="">Product</option>
-                      {products.map((p) => (
+                      {safeProducts.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
                         </option>

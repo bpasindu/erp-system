@@ -8,7 +8,14 @@ const initialForm = {
   notes: '',
 };
 
-const AddCustomerModal = ({ isOpen, onClose, onSave, loading, error }) => {
+const AddCustomerModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  loading,
+  error,
+  activeTab,
+}) => {
   const [form, setForm] = useState(initialForm);
 
   useEffect(() => {
@@ -29,11 +36,13 @@ const AddCustomerModal = ({ isOpen, onClose, onSave, loading, error }) => {
     onSave(form);
   };
 
+  const title = activeTab === 'suppliers' ? 'Add Supplier' : 'Add Customer';
+
   return (
     <div className="modal-overlay">
       <div className="product-modal">
         <div className="product-modal-header">
-          <h2>Add Customer</h2>
+          <h2>{title}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Close">
             ×
           </button>
@@ -114,4 +123,5 @@ const AddCustomerModal = ({ isOpen, onClose, onSave, loading, error }) => {
 };
 
 export default AddCustomerModal;
+
 

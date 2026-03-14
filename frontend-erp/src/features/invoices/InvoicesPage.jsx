@@ -9,8 +9,6 @@ const InvoicesPage = () => {
   const [invoices, setInvoices] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [warehouseId, setWarehouseId] = useState(null);
-
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -41,38 +39,21 @@ const InvoicesPage = () => {
       setError('');
 
       try {
-        const [invRes, custRes, prodRes, invBalRes] = await Promise.all([
-          fetch(`${API_BASE}/api/invoices/business/${businessId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-          fetch(`${API_BASE}/api/customers/business/${businessId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-          fetch(`${API_BASE}/api/products/business/${businessId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-          fetch(`${API_BASE}/api/inventory/balances/business/${businessId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }),
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        };
+
+        const [invRes, custRes, prodRes] = await Promise.all([
+          fetch(`${API_BASE}/api/invoices/business/${businessId}`, { headers }),
+          fetch(`${API_BASE}/api/customers/business/${businessId}`, { headers }),
+          fetch(`${API_BASE}/api/products/business/${businessId}`, { headers }),
         ]);
 
-        const [invData, custData, prodData, invBalData] = await Promise.all([
+        const [invData, custData, prodData] = await Promise.all([
           invRes.json(),
           custRes.json(),
           prodRes.json(),
-          invBalRes.json(),
         ]);
 
         if (!invRes.ok || !invData.success) {
@@ -88,13 +69,6 @@ const InvoicesPage = () => {
         setInvoices(invData.data || []);
         setCustomers(custData.data || []);
         setProducts(prodData.data || []);
-
-        if (invBalRes.ok && invBalData.success && invBalData.data?.length) {
-          const first = invBalData.data[0];
-          setWarehouseId(first.warehouseId);
-        } else {
-          setWarehouseId(null);
-        }
       } catch (e) {
         setError(e.message || 'Failed to load invoice data.');
       } finally {
@@ -154,15 +128,12 @@ const InvoicesPage = () => {
       return;
     }
 
-    const effectiveWarehouseId = warehouseId ?? 1;
-
     setSaving(true);
     setModalError('');
 
     const payload = {
       businessId,
       customerId: Number(customerId),
-      warehouseId: effectiveWarehouseId,
       items: items.map((it) => ({
         productId: Number(it.productId),
         quantity: Number(it.quantity),
@@ -206,6 +177,16 @@ const InvoicesPage = () => {
     }
   };
 
+  const handleOpenModal = () => {
+    if (!customers.length || !products.length) {
+      setError('You need at least one customer and one product before creating invoices.');
+      return;
+    }
+
+    setModalError('');
+    setShowModal(true);
+  };
+
   return (
     <div className="products-page invoices-page">
       <div className="products-header">
@@ -216,8 +197,9 @@ const InvoicesPage = () => {
           </p>
         </div>
         <button
+          type="button"
           className="btn btn-primary"
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenModal}
         >
           + Create Invoice
         </button>
@@ -312,8 +294,8 @@ const InvoicesPage = () => {
         onSave={handleCreateInvoice}
         loading={saving}
         error={modalError}
-        customers={customers}
-        products={products}
+        customers={customers ?? []}
+        products={products ?? []}
       />
     </div>
   );

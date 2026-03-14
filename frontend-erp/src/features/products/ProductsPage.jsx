@@ -1,20 +1,37 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AddProductModal from './AddProductModal';
+import AdjustStockModal from './AdjustStockModal';
 import './ProductsPage.css';
 
 const API_BASE = 'http://localhost:8080';
 
 const normalizeProducts = (items) =>
-  items.map((p) => {
+  (Array.isArray(items) ? items : []).map((p) => {
     let meta = {};
-    try {
-      if (p.description) {
+    let parsedDescription = '';
+
+    if (typeof p.description === 'string' && p.description.trim()) {
+      try {
         meta = JSON.parse(p.description);
+      } catch {
+        parsedDescription = p.description;
       }
-    } catch {
-      meta = {};
     }
-    return { ...p, ...meta };
+
+    return {
+      ...p,
+      ...meta,
+      descriptionText: parsedDescription,
+      stockQty: Number(
+        p.stockQuantity ??
+          meta.stockQty ??
+          meta.stockQuantity ??
+          0
+      ),
+      reorderLevel: Number(meta.reorderLevel ?? 0),
+      category: meta.category ?? '',
+      supplier: meta.supplier ?? '',
+    };
   });
 
 const ProductsPage = () => {
@@ -24,6 +41,8 @@ const ProductsPage = () => {
   const [error, setError] = useState('');
   const [modalError, setModalError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [stockModalProduct, setStockModalProduct] = useState(null);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [lowStockOnly, setLowStockOnly] = useState(false);
@@ -39,50 +58,51 @@ const ProductsPage = () => {
 
   const businessId = user?.businessId;
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      if (!token || !businessId) {
-        setError('Missing authentication information. Please sign in again.');
+  const loadProducts = useCallback(async () => {
+    if (!token || !businessId) {
+      setError('Missing authentication information. Please sign in again.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/products/business/${businessId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.message || 'Failed to load products.');
         return;
       }
 
-      setLoading(true);
-      setError('');
-
-      try {
-        const res = await fetch(
-          `${API_BASE}/api/products/business/${businessId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          setError(data.message || 'Failed to load products.');
-          return;
-        }
-
-        setProducts(normalizeProducts(data.data || []));
-      } catch (e) {
-        setError('Network error while loading products.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
+      const normalized = normalizeProducts(data.data || []);
+      setProducts(normalized);
+    } catch (e) {
+      setError('Network error while loading products.');
+    } finally {
+      setLoading(false);
+    }
   }, [token, businessId]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const categories = useMemo(() => {
     const set = new Set();
     products.forEach((p) => {
-      if (p.category) {
-        set.add(p.category);
+      if (p.category && String(p.category).trim()) {
+        set.add(String(p.category).trim());
       }
     });
     return Array.from(set);
@@ -101,9 +121,7 @@ const ProductsPage = () => {
 
       const matchesLowStock =
         !lowStockOnly ||
-        (p.stockQty !== undefined &&
-          p.reorderLevel !== undefined &&
-          Number(p.stockQty) <= Number(p.reorderLevel));
+        Number(p.stockQty ?? 0) <= Number(p.reorderLevel ?? 0);
 
       return matchesSearch && matchesCategory && matchesLowStock;
     });
@@ -129,17 +147,22 @@ const ProductsPage = () => {
       sku: form.sku || undefined,
       price: Number(form.sellingPrice) || 0,
       cost: Number(form.buyingPrice) || 0,
+      stockQuantity: Number(form.stockQty ?? 0),
       description: JSON.stringify({
         category: form.category || '',
         supplier: form.supplier || '',
-        stockQty: form.stockQty || 0,
-        reorderLevel: form.reorderLevel || 0,
+        reorderLevel: Number(form.reorderLevel ?? 0),
       }),
     };
 
+    const url = editingProduct
+      ? `${API_BASE}/api/products/${editingProduct.id}`
+      : `${API_BASE}/api/products`;
+    const method = editingProduct ? 'PUT' : 'POST';
+
     try {
-      const res = await fetch(`${API_BASE}/api/products`, {
-        method: 'POST',
+      const res = await fetch(url, {
+        method,
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -150,12 +173,12 @@ const ProductsPage = () => {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setModalError(data.message || 'Failed to create product.');
+        setModalError(data.message || (editingProduct ? 'Failed to update product.' : 'Failed to create product.'));
         return;
       }
 
-      const created = normalizeProducts([data.data])[0];
-      setProducts((prev) => [created, ...prev]);
+      await loadProducts();
+      setEditingProduct(null);
       setShowModal(false);
     } catch (e) {
       setModalError('Network error while saving product.');
@@ -188,7 +211,10 @@ const ProductsPage = () => {
         </div>
         <button
           className="btn btn-primary"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setEditingProduct(null);
+            setShowModal(true);
+          }}
         >
           + Add Product
         </button>
@@ -257,7 +283,7 @@ const ProductsPage = () => {
                     <td>{`Rs. ${Number(p.price ?? 0).toLocaleString()}`}</td>
                     <td>
                       <div className="stock-cell">
-                        <span>{p.stockQty ?? 0}</span>
+                        <span>{Number(p.stockQty ?? 0)}</span>
                         {stockStatus && (
                           <span className={`stock-badge ${stockStatus.className}`}>
                             {stockStatus.label}
@@ -266,13 +292,44 @@ const ProductsPage = () => {
                       </div>
                     </td>
                     <td className="cell-actions">
-                      <button className="icon-button" title="View">
-                        🧾
+                      <button
+                        className="icon-button"
+                        title="Adjust stock"
+                        onClick={() => setStockModalProduct(p)}
+                      >
+                        ⚖️
                       </button>
-                      <button className="icon-button" title="Edit">
+                      <button
+                        className="icon-button"
+                        title="Edit"
+                        onClick={() => {
+                          setEditingProduct(p);
+                          setShowModal(true);
+                        }}
+                      >
                         ✏️
                       </button>
-                      <button className="icon-button danger" title="Delete">
+                      <button
+                        className="icon-button danger"
+                        title="Delete"
+                        onClick={async () => {
+                          if (!window.confirm('Delete this product?')) return;
+                          try {
+                            const res = await fetch(`${API_BASE}/api/products/${p.id}`, {
+                              method: 'DELETE',
+                              headers: { Authorization: `Bearer ${token}` },
+                            });
+                            const data = await res.json().catch(() => ({}));
+                            if (!res.ok || (data && data.success === false)) {
+                              alert(data.message || 'Failed to delete product.');
+                              return;
+                            }
+                            await loadProducts();
+                          } catch {
+                            alert('Network error while deleting product.');
+                          }
+                        }}
+                      >
                         🗑️
                       </button>
                     </td>
@@ -290,6 +347,47 @@ const ProductsPage = () => {
         onSave={handleSaveProduct}
         loading={saving}
         error={modalError}
+        initialValues={
+          editingProduct
+            ? {
+                name: editingProduct.name || '',
+                sku: editingProduct.sku || '',
+                category: editingProduct.category || '',
+                supplier: editingProduct.supplier || '',
+                buyingPrice: editingProduct.cost ?? '',
+                sellingPrice: editingProduct.price ?? '',
+                stockQty: editingProduct.stockQty ?? '',
+                reorderLevel: editingProduct.reorderLevel ?? '',
+              }
+            : null
+        }
+        title={editingProduct ? 'Edit Product' : 'Add Product'}
+      />
+
+      <AdjustStockModal
+        isOpen={!!stockModalProduct}
+        onClose={() => setStockModalProduct(null)}
+        product={stockModalProduct}
+        loading={saving}
+        error={modalError}
+        onApply={async ({ delta }) => {
+          if (!stockModalProduct) return;
+          const updatedQty =
+            Number(stockModalProduct.stockQty ?? 0) + Number(delta);
+          const form = {
+            name: stockModalProduct.name,
+            sku: stockModalProduct.sku,
+            category: stockModalProduct.category,
+            supplier: stockModalProduct.supplier,
+            buyingPrice: stockModalProduct.cost,
+            sellingPrice: stockModalProduct.price,
+            stockQty: updatedQty,
+            reorderLevel: stockModalProduct.reorderLevel,
+          };
+          setEditingProduct(stockModalProduct);
+          await handleSaveProduct(form);
+          setStockModalProduct(null);
+        }}
       />
     </div>
   );

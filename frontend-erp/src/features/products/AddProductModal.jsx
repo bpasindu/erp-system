@@ -11,14 +11,29 @@ const initialFormState = {
   reorderLevel: '',
 };
 
-const AddProductModal = ({ isOpen, onClose, onSave, loading, error }) => {
+const AddProductModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  loading,
+  error,
+  initialValues,
+  title = 'Add Product',
+}) => {
   const [form, setForm] = useState(initialFormState);
 
   useEffect(() => {
     if (isOpen) {
-      setForm(initialFormState);
+      if (initialValues) {
+        setForm({
+          ...initialFormState,
+          ...initialValues,
+        });
+      } else {
+        setForm(initialFormState);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialValues]);
 
   if (!isOpen) return null;
 
@@ -36,7 +51,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, loading, error }) => {
     <div className="modal-overlay">
       <div className="product-modal">
         <div className="product-modal-header">
-          <h2>Add Product</h2>
+          <h2>{title}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Close">
             ×
           </button>

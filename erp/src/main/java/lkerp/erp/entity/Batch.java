@@ -2,15 +2,20 @@ package lkerp.erp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "stock_movements")
+@Table(name = "batches")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StockMovement {
+public class Batch {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,15 +32,19 @@ public class StockMovement {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "batch_number", nullable = false)
+    private String batchNumber;
+
     private Integer quantity;
 
-    private String type; // IN, OUT (STOCK_IN mapped as IN)
+    @Column(name = "cost_price", precision = 19, scale = 2)
+    private BigDecimal costPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "batch_id")
-    private Batch batch;
-
-    @Column(name = "movement_date")
+    @Column(name = "created_at")
     @Builder.Default
-    private LocalDateTime movementDate = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "batch")
+    @Builder.Default
+    private List<StockMovement> stockMovements = new ArrayList<>();
 }

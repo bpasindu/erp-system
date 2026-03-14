@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 const todayString = () => new Date().toISOString().slice(0, 10);
 
-const AddEntryModal = ({ isOpen, onClose, onSave, loading, error, categories }) => {
+const AddEntryModal = ({ isOpen, onClose, onSave, loading, error }) => {
   const [type, setType] = useState('INCOME');
   const [date, setDate] = useState(todayString());
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryName, setCategoryName] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [method, setMethod] = useState('Cash');
@@ -14,17 +14,12 @@ const AddEntryModal = ({ isOpen, onClose, onSave, loading, error, categories }) 
     if (isOpen) {
       setType('INCOME');
       setDate(todayString());
-      setCategoryId('');
+      setCategoryName('');
       setAmount('');
       setNote('');
       setMethod('Cash');
     }
   }, [isOpen]);
-
-  const filteredCategories = useMemo(
-    () => categories.filter((c) => c.type === type),
-    [categories, type]
-  );
 
   if (!isOpen) return null;
 
@@ -33,7 +28,7 @@ const AddEntryModal = ({ isOpen, onClose, onSave, loading, error, categories }) 
     onSave({
       type,
       date,
-      categoryId,
+      categoryName,
       amount,
       note,
       method,
@@ -75,19 +70,13 @@ const AddEntryModal = ({ isOpen, onClose, onSave, loading, error, categories }) 
 
           <div className="form-group">
             <label htmlFor="category">Category</label>
-            <select
+            <input
               id="category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="e.g. Rent, Electricity"
               required
-            >
-              <option value="">Select category</option>
-              {filteredCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="form-group">

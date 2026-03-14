@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Page2.css';
 import Sidebar from '../../common/layout/Sidebar';
 import TopHeader from '../../common/layout/TopHeader';
+import WarehouseModal from '../../features/warehouses/WarehouseModal';
 
 // Reusable Components
 const DashboardCard = ({ title, value, icon, description, trend }) => (
@@ -113,6 +114,7 @@ const Page2 = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showWarehouseModal, setShowWarehouseModal] = useState(false);
 
   const token = localStorage.getItem('token');
   const user = (() => {
@@ -268,6 +270,13 @@ const Page2 = () => {
               <button
                 className="btn btn-secondary"
                 type="button"
+                onClick={() => setShowWarehouseModal(true)}
+              >
+                📦 Warehouse
+              </button>
+              <button
+                className="btn btn-secondary"
+                type="button"
                 onClick={() => navigate('/products')}
               >
                 📦 Add Product
@@ -348,6 +357,13 @@ const Page2 = () => {
           )}
         </div>
       </main>
+
+      <WarehouseModal
+        isOpen={showWarehouseModal}
+        onClose={() => setShowWarehouseModal(false)}
+        businessId={businessId}
+        token={token}
+      />
     </div>
   );
 };

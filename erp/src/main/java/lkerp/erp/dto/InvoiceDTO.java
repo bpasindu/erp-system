@@ -25,9 +25,6 @@ public class InvoiceDTO {
         @NotNull(message = "Customer ID is required")
         private Long customerId;
 
-        @NotNull(message = "Warehouse ID is required for inventory deduction")
-        private Long warehouseId;
-
         @NotEmpty(message = "Invoice must contain at least one item")
         private List<InvoiceItemDTO> items;
     }

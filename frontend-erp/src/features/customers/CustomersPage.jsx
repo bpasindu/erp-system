@@ -7,6 +7,7 @@ const API_BASE = 'http://localhost:8080';
 
 const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -27,7 +28,7 @@ const CustomersPage = () => {
   const businessId = user?.businessId;
 
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       if (!token || !businessId) {
         setError('Missing authentication information. Please sign in again.');
         return;
@@ -37,47 +38,63 @@ const CustomersPage = () => {
       setError('');
 
       try {
-        const res = await fetch(
-          `${API_BASE}/api/customers/business/${businessId}`,
-          {
+        const [customersRes, suppliersRes] = await Promise.all([
+          fetch(`${API_BASE}/api/customers/business/${businessId}`, {
             headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
-          }
-        );
+          }),
+          fetch(`${API_BASE}/api/suppliers/business/${businessId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        ]);
 
-        const data = await res.json();
+        const customersData = await customersRes.json();
+        const suppliersData = await suppliersRes.json();
 
-        if (!res.ok || !data.success) {
-          setError(data.message || 'Failed to load customers.');
-          return;
+        if (!customersRes.ok || !customersData.success) {
+          setError(customersData.message || 'Failed to load customers.');
+        } else {
+          setCustomers(customersData.data || []);
         }
 
-        setCustomers(data.data || []);
+        if (!suppliersRes.ok || !suppliersData.success) {
+          setError((prev) =>
+            prev
+              ? prev
+              : suppliersData.message || 'Failed to load suppliers.'
+          );
+        } else {
+          setSuppliers(suppliersData.data || []);
+        }
       } catch (e) {
-        setError('Network error while loading customers.');
+        setError('Network error while loading contacts.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCustomers();
+    fetchData();
   }, [token, businessId]);
 
-  const filteredCustomers = useMemo(() => {
-    return customers.filter((c) => {
+  const filteredItems = useMemo(() => {
+    const list = activeTab === 'customers' ? customers : suppliers;
+    return list.filter((item) => {
       if (!search) return true;
       const term = search.toLowerCase();
       return (
-        c.name?.toLowerCase().includes(term) ||
-        c.email?.toLowerCase().includes(term) ||
-        c.phone?.toLowerCase().includes(term)
+        item.name?.toLowerCase().includes(term) ||
+        item.email?.toLowerCase().includes(term) ||
+        item.phone?.toLowerCase().includes(term)
       );
     });
-  }, [customers, search]);
+  }, [customers, suppliers, search, activeTab]);
 
-  const handleSaveCustomer = async (form) => {
+  const handleSave = async (form) => {
     if (!token || !businessId) {
       setModalError('Missing authentication information. Please sign in again.');
       return;
@@ -91,7 +108,7 @@ const CustomersPage = () => {
     setSaving(true);
     setModalError('');
 
-    const payload = {
+    const basePayload = {
       businessId,
       name: form.name,
       email: form.email || undefined,
@@ -99,37 +116,71 @@ const CustomersPage = () => {
       address: form.address || undefined,
     };
 
+    const isCustomersTab = activeTab === 'customers';
+
+    const url = isCustomersTab
+      ? `${API_BASE}/api/customers`
+      : `${API_BASE}/api/suppliers`;
+
     try {
-      const res = await fetch(`${API_BASE}/api/customers`, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(basePayload),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setModalError(data.message || 'Failed to create customer.');
+        setModalError(
+          data.message ||
+            `Failed to create ${isCustomersTab ? 'customer' : 'supplier'}.`
+        );
         return;
       }
 
-      setCustomers((prev) => [data.data, ...prev]);
+      if (isCustomersTab) {
+        setCustomers((prev) => [data.data, ...prev]);
+      } else {
+        setSuppliers((prev) => [data.data, ...prev]);
+      }
+
       setShowModal(false);
     } catch (e) {
-      setModalError('Network error while saving customer.');
+      setModalError(
+        `Network error while saving ${isCustomersTab ? 'customer' : 'supplier'}.`
+      );
     } finally {
       setSaving(false);
     }
   };
 
+  const heading =
+    activeTab === 'customers'
+      ? 'Customers & Suppliers'
+      : 'Customers & Suppliers';
+
+  const searchPlaceholder =
+    activeTab === 'customers' ? 'Search customers...' : 'Search suppliers...';
+
+  const emptyText =
+    activeTab === 'customers'
+      ? 'No customers found.'
+      : 'No suppliers found.';
+
+  const loadingText =
+    activeTab === 'customers'
+      ? 'Loading customers...'
+      : 'Loading suppliers...';
+
   return (
     <div className="products-page customers-page">
       <div className="products-header">
         <div>
-          <h1 className="page-title">Customers &amp; Suppliers</h1>
+          <h1 className="page-title">{heading}</h1>
           <p className="page-subtitle">
             Keep track of your customers and supplier contacts.
           </p>
@@ -149,6 +200,7 @@ const CustomersPage = () => {
               activeTab === 'customers' ? ' active' : ''
             }`}
             type="button"
+            onClick={() => setActiveTab('customers')}
           >
             Customers
           </button>
@@ -157,7 +209,7 @@ const CustomersPage = () => {
               activeTab === 'suppliers' ? ' active' : ''
             }`}
             type="button"
-            disabled
+            onClick={() => setActiveTab('suppliers')}
           >
             Suppliers
           </button>
@@ -166,7 +218,7 @@ const CustomersPage = () => {
           <span className="search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Search customers..."
+            placeholder={searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -177,19 +229,21 @@ const CustomersPage = () => {
 
       <div className="customers-grid-wrapper">
         {loading ? (
-          <div className="loading-state">Loading customers...</div>
-        ) : filteredCustomers.length === 0 ? (
-          <div className="empty-state">No customers found.</div>
+          <div className="loading-state">{loadingText}</div>
+        ) : filteredItems.length === 0 ? (
+          <div className="empty-state">{emptyText}</div>
         ) : (
           <div className="customers-grid">
-            {filteredCustomers.map((c) => (
-              <div key={c.id} className="customer-card">
+            {filteredItems.map((item) => (
+              <div key={item.id} className="customer-card">
                 <div className="customer-main">
-                  <h3>{c.name}</h3>
-                  {c.phone && <p className="customer-phone">{c.phone}</p>}
-                  {c.email && <p className="customer-email">{c.email}</p>}
-                  {c.address && (
-                    <p className="customer-address">{c.address}</p>
+                  <h3>{item.name}</h3>
+                  {item.phone && <p className="customer-phone">{item.phone}</p>}
+                  {item.email && (
+                    <p className="customer-email">{item.email}</p>
+                  )}
+                  {item.address && (
+                    <p className="customer-address">{item.address}</p>
                   )}
                 </div>
                 <div className="customer-actions">
@@ -212,13 +266,15 @@ const CustomersPage = () => {
       <AddCustomerModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        onSave={handleSaveCustomer}
+        onSave={handleSave}
         loading={saving}
         error={modalError}
+        activeTab={activeTab}
       />
     </div>
   );
 };
 
 export default CustomersPage;
+
 
