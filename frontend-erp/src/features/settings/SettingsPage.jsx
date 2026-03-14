@@ -6,6 +6,14 @@ const SettingsPage = () => {
   const [businessName, setBusinessName] = useState('SmartBiz');
   const [darkMode, setDarkMode] = useState(false);
 
+  // Password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   const handleSaveProfile = (e) => {
     e.preventDefault();
     // Placeholder for future backend integration
@@ -17,6 +25,51 @@ const SettingsPage = () => {
     // Placeholder for future backend integration
     // eslint-disable-next-line no-console
     console.log('Reset mock data');
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordMessage('');
+    setPasswordError('');
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords don't match.");
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (!user || !user.userId) {
+        setPasswordError('User not authenticated.');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:8080/api/users/${user.userId}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPasswordMessage('Password changed successfully.');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setPasswordError(data.message || 'Failed to change password.');
+      }
+    } catch (err) {
+      setPasswordError('Network error. Check backend connection.');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   return (
@@ -51,6 +104,48 @@ const SettingsPage = () => {
           </div>
           <button type="submit" className="btn btn-primary settings-save-btn">
             Save Profile
+          </button>
+        </form>
+      </div>
+
+      <div className="settings-card">
+        <h2 className="settings-section-title">Change Password</h2>
+        <form onSubmit={handleChangePassword} className="settings-form">
+          {passwordMessage && <div style={{ color: '#16a34a', marginBottom: '1rem', backgroundColor: '#dcfce7', padding: '0.5rem', borderRadius: '4px' }}>{passwordMessage}</div>}
+          {passwordError && <div style={{ color: '#dc2626', marginBottom: '1rem', backgroundColor: '#fee2e2', padding: '0.5rem', borderRadius: '4px' }}>{passwordError}</div>}
+
+          <div className="form-group">
+            <label>Current Password</label>
+            <input
+              type="password"
+              placeholder="Enter current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>New Password</label>
+            <input
+              type="password"
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary settings-save-btn" disabled={passwordLoading}>
+            {passwordLoading ? 'Changing...' : 'Change Password'}
           </button>
         </form>
       </div>

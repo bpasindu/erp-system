@@ -1,0 +1,126 @@
+/* Statistics.css */
+.sa-statistics {
+  animation: fadeIn 0.3s ease;
+}
+
+.sa-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sa-stats-tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.sa-tab {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.sa-tab:hover {
+  color: #1e293b;
+}
+
+.sa-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+.sa-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.sa-stats-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.sa-stats-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #0f172a;
+}
+
+.sa-stats-chart-large {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sa-mock-bar-chart {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  border-bottom: 1px dashed #e2e8f0;
+  border-left: 1px dashed #e2e8f0;
+  padding: 0 10px 10px 10px;
+  position: relative;
+}
+
+/* Background grid lines simulated */
+.sa-mock-bar-chart::before {
+  content: '';
+  position: absolute;
+  top: 33%; left: 0; right: 0; height: 1px; border-top: 1px dashed #e2e8f0; z-index: 0;
+}
+.sa-mock-bar-chart::after {
+  content: '';
+  position: absolute;
+  top: 66%; left: 0; right: 0; height: 1px; border-top: 1px dashed #e2e8f0; z-index: 0;
+}
+
+.sa-bar {
+  flex: 1;
+  background-color: #3b82f6;
+  border-radius: 2px 2px 0 0;
+  z-index: 1;
+}
+
+.sa-mock-line-chart {
+  flex: 1;
+  border-bottom: 1px dashed #e2e8f0;
+  border-left: 1px dashed #e2e8f0;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.sa-mock-line-chart::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0; right: 0; height: 1px; border-top: 1px dashed #e2e8f0; z-index: 0;
+}
+
+.sa-line-svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.sa-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  color: #64748b;
+  font-size: 12px;
+}

@@ -20,6 +20,10 @@ public class Business {
     private String name;
     private String currency;
     private String status;
+    private String plan;
+    
+    @Column(name = "owner_email")
+    private String ownerEmail;
 
     @Column(name = "created_at")
     @Builder.Default
