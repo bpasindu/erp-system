@@ -127,7 +127,7 @@ const ProductsPage = () => {
     });
   }, [products, search, selectedCategory, lowStockOnly]);
 
-  const handleSaveProduct = async (form) => {
+  const handleSaveProduct = async (form, productToEdit = editingProduct) => {
     if (!token || !businessId) {
       setModalError('Missing authentication information. Please sign in again.');
       return;
@@ -155,10 +155,10 @@ const ProductsPage = () => {
       }),
     };
 
-    const url = editingProduct
-      ? `${API_BASE}/api/products/${editingProduct.id}`
+    const url = productToEdit
+      ? `${API_BASE}/api/products/${productToEdit.id}`
       : `${API_BASE}/api/products`;
-    const method = editingProduct ? 'PUT' : 'POST';
+    const method = productToEdit ? 'PUT' : 'POST';
 
     try {
       const res = await fetch(url, {
@@ -173,7 +173,7 @@ const ProductsPage = () => {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setModalError(data.message || (editingProduct ? 'Failed to update product.' : 'Failed to create product.'));
+        setModalError(data.message || (productToEdit ? 'Failed to update product.' : 'Failed to create product.'));
         return;
       }
 
@@ -385,7 +385,7 @@ const ProductsPage = () => {
             reorderLevel: stockModalProduct.reorderLevel,
           };
           setEditingProduct(stockModalProduct);
-          await handleSaveProduct(form);
+          await handleSaveProduct(form, stockModalProduct);
           setStockModalProduct(null);
         }}
       />

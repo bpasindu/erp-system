@@ -8,4 +8,5 @@ public interface InvoiceService {
     InvoiceDTO.Response getInvoice(Long id);
     List<InvoiceDTO.Response> getInvoicesByBusiness(Long businessId);
     void deleteInvoice(Long id);
+    InvoiceDTO.Response updateInvoiceStatus(Long id, String status);
 }

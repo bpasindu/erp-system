@@ -142,13 +142,13 @@ const LedgerPage = () => {
     };
   }, [filteredForDay]);
 
-  const handleSaveEntry = async ({ type, date, categoryId, amount, note, method }) => {
+  const handleSaveEntry = async ({ type, date, categoryName, amount, note, method }) => {
     if (!token || !businessId) {
       setModalError('Missing authentication information. Please sign in again.');
       return;
     }
 
-    if (!categoryId || !amount) {
+    if (!categoryName || !amount) {
       setModalError('Category and amount are required.');
       return;
     }
@@ -156,19 +156,49 @@ const LedgerPage = () => {
     setSaving(true);
     setModalError('');
 
-    const payload = {
-      businessId,
-      categoryId: Number(categoryId),
-      amount: Number(amount),
-      description: JSON.stringify({
-        note: note || '',
-        method,
-        date,
-      }),
-      type,
-    };
-
     try {
+      // Find or create category
+      let finalCategoryId = null;
+      const existingCategory = categories.find(
+        (c) => c.name.toLowerCase() === categoryName.trim().toLowerCase()
+      );
+
+      if (existingCategory) {
+        finalCategoryId = existingCategory.id;
+      } else {
+        // Create new category
+        const catRes = await fetch(`${API_BASE}/api/finance/categories`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            businessId,
+            name: categoryName.trim(),
+            type,
+          }),
+        });
+        const catData = await catRes.json();
+        if (!catRes.ok || !catData.success) {
+          throw new Error(catData.message || 'Failed to create new category.');
+        }
+        finalCategoryId = catData.data.id;
+        setCategories((prev) => [...prev, catData.data]);
+      }
+
+      const payload = {
+        businessId,
+        categoryId: Number(finalCategoryId),
+        amount: Number(amount),
+        description: JSON.stringify({
+          note: note || '',
+          method,
+          date,
+        }),
+        type,
+      };
+
       const res = await fetch(`${API_BASE}/api/finance/transactions`, {
         method: 'POST',
         headers: {
@@ -189,7 +219,7 @@ const LedgerPage = () => {
       setShowModal(false);
       setSelectedDate(date);
     } catch (e) {
-      setModalError('Network error while saving entry.');
+      setModalError(e.message || 'Network error while saving entry.');
     } finally {
       setSaving(false);
     }

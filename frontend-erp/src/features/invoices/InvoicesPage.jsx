@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import CreateInvoiceModal from './CreateInvoiceModal';
+import InvoiceViewModal from './InvoiceViewModal';
 import '../products/ProductsPage.css';
 import './InvoicesPage.css';
 
@@ -14,6 +15,7 @@ const InvoicesPage = () => {
   const [error, setError] = useState('');
   const [modalError, setModalError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [viewInvoice, setViewInvoice] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -187,6 +189,48 @@ const InvoicesPage = () => {
     setShowModal(true);
   };
 
+  const handleToggleStatus = async (inv) => {
+    if (!token) return;
+    const newStatus = inv.status?.toLowerCase() === 'paid' ? 'unpaid' : 'paid';
+    if (!window.confirm(`Mark invoice ${inv.invoiceNumber} as ${newStatus}?`)) return;
+    
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/invoices/${inv.id}/status?status=${newStatus.toUpperCase()}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update status');
+      
+      setInvoices(prev => prev.map(i => i.id === inv.id ? data.data : i));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteInvoice = async (inv) => {
+    if (!token) return;
+    if (!window.confirm(`Delete invoice ${inv.invoiceNumber}?`)) return;
+    
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/invoices/${inv.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to delete invoice');
+      
+      setInvoices(prev => prev.filter(i => i.id !== inv.id));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="products-page invoices-page">
       <div className="products-header">
@@ -268,16 +312,16 @@ const InvoicesPage = () => {
                     </span>
                   </td>
                   <td className="cell-actions">
-                    <button className="icon-button" title="View">
+                    <button className="icon-button" title="View" onClick={() => setViewInvoice(inv)}>
                       👁️
                     </button>
-                    <button className="icon-button" title="Mark paid">
+                    <button className="icon-button" title="Mark paid" onClick={() => handleToggleStatus(inv)}>
                       ✔️
                     </button>
-                    <button className="icon-button" title="Download">
+                    <button className="icon-button" title="Download" onClick={() => setViewInvoice(inv)}>
                       ⬇️
                     </button>
-                    <button className="icon-button danger" title="Delete">
+                    <button className="icon-button danger" title="Delete" onClick={() => handleDeleteInvoice(inv)}>
                       🗑️
                     </button>
                   </td>
@@ -296,6 +340,14 @@ const InvoicesPage = () => {
         error={modalError}
         customers={customers ?? []}
         products={products ?? []}
+      />
+      
+      <InvoiceViewModal
+        isOpen={!!viewInvoice}
+        onClose={() => setViewInvoice(null)}
+        invoice={viewInvoice}
+        customer={viewInvoice ? customers.find(c => c.id === viewInvoice.customerId) : null}
+        products={products}
       />
     </div>
   );

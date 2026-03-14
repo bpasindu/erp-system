@@ -117,6 +117,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional
+    public InvoiceDTO.Response updateInvoiceStatus(Long id, String status) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found id: " + id));
+        invoice.setStatus(status);
+        Invoice saved = invoiceRepository.save(invoice);
+        return mapToResponse(saved);
+    }
+
     private InvoiceDTO.Response mapToResponse(Invoice invoice) {
         List<InvoiceDTO.InvoiceItemResponse> itemResponses = new ArrayList<>();
         if (invoice.getItems() != null) {

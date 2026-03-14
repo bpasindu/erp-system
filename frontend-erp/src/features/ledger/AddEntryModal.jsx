@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 const todayString = () => new Date().toISOString().slice(0, 10);
 
-const AddEntryModal = ({ isOpen, onClose, onSave, loading, error }) => {
+const AddEntryModal = ({ isOpen, onClose, onSave, loading, error, categories = [] }) => {
   const [type, setType] = useState('INCOME');
   const [date, setDate] = useState(todayString());
   const [categoryName, setCategoryName] = useState('');
@@ -69,14 +69,20 @@ const AddEntryModal = ({ isOpen, onClose, onSave, loading, error }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="category">Category</label>
+            <label htmlFor="categoryName">Category</label>
             <input
-              id="category"
+              id="categoryName"
+              list="category-options"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               placeholder="e.g. Rent, Electricity"
               required
             />
+            <datalist id="category-options">
+              {categories.map((c) => (
+                <option key={c.id} value={c.name} />
+              ))}
+            </datalist>
           </div>
 
           <div className="form-group">
