@@ -14,6 +14,7 @@ import lkerp.erp.repository.InvoiceItemRepository;
 import lkerp.erp.repository.InvoiceRepository;
 import lkerp.erp.repository.ProductRepository;
 import lkerp.erp.service.InvoiceService;
+import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final BusinessRepository businessRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final UsageLogService usageLogService;
 
     @Override
     @Transactional
@@ -90,6 +92,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         savedInvoice.setTotalAmount(grandTotal);
         savedInvoice.setItems(invoiceItems);
         Invoice finalInvoice = invoiceRepository.save(savedInvoice);
+
+        usageLogService.log(business.getId(), null, "CREATE_INVOICE", "Created invoice " + finalInvoice.getInvoiceNumber() + " for total amount: " + finalInvoice.getTotalAmount());
 
         return mapToResponse(finalInvoice);
     }

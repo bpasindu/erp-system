@@ -9,4 +9,5 @@ public interface UserService {
     List<UserDTO.Response> getUsersByBusiness(Long businessId);
     UserDTO.Response updateUser(Long id, UserDTO.Request request);
     void deleteUser(Long id);
+    void changePassword(Long id, UserDTO.ChangePasswordRequest request);
 }

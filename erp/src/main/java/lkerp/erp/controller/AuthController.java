@@ -11,6 +11,7 @@ import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.repository.UserRepository;
 import lkerp.erp.security.CustomUserDetails;
 import lkerp.erp.security.JwtUtil;
+import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final BusinessRepository businessRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UsageLogService usageLogService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthDTO.AuthResponse>> login(@Valid @RequestBody AuthDTO.LoginRequest request) {
@@ -49,6 +51,10 @@ public class AuthController {
                 .role(user.getRole())
                 .businessId(user.getBusiness() != null ? user.getBusiness().getId() : null)
                 .build();
+
+        if (user.getBusiness() != null) {
+            usageLogService.log(user.getBusiness().getId(), user.getId(), "LOGIN", "User logged into the system via email: " + user.getEmail());
+        }
 
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }

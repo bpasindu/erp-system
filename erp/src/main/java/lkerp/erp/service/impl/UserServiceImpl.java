@@ -9,6 +9,7 @@ import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.repository.UserRepository;
 import lkerp.erp.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BusinessRepository businessRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDTO.Response createUser(UserDTO.Request request) {
@@ -79,6 +81,19 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void changePassword(Long id, UserDTO.ChangePasswordRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+        
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     private UserDTO.Response mapToResponse(User user) {

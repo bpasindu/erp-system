@@ -9,6 +9,7 @@ import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.repository.ProductCategoryRepository;
 import lkerp.erp.repository.ProductRepository;
 import lkerp.erp.service.ProductService;
+import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
     private final ProductCategoryRepository categoryRepository;
+    private final UsageLogService usageLogService;
 
     @Override
     public ProductDTO.Response createProduct(ProductDTO.Request request) {
@@ -49,6 +51,9 @@ public class ProductServiceImpl implements ProductService {
                 .build();
 
         Product saved = productRepository.save(product);
+        
+        usageLogService.log(business.getId(), null, "CREATE_PRODUCT", "Created new product: " + saved.getName());
+
         return mapToResponse(saved);
     }
 
@@ -89,15 +94,22 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Product updated = productRepository.save(product);
+
+        usageLogService.log(updated.getBusiness().getId(), null, "UPDATE_PRODUCT", "Updated product: " + updated.getName());
+
         return mapToResponse(updated);
     }
 
     @Override
     public void deleteProduct(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Product not found with id: " + id);
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        Long businessId = product.getBusiness().getId();
+        String name = product.getName();
+        
         productRepository.deleteById(id);
+
+        usageLogService.log(businessId, null, "DELETE_PRODUCT", "Deleted product: " + name);
     }
 
     private ProductDTO.Response mapToResponse(Product product) {

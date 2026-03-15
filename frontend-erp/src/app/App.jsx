@@ -10,6 +10,16 @@ import Page7 from '../pages/Page7/Page7';
 import Page8 from '../pages/Page8/Page8';
 import Page9 from '../pages/Page9/Page9';
 
+// Super Admin Imports
+import SuperAdminLayout from '../super_admin/layouts/SuperAdminLayout';
+import Dashboard from '../super_admin/pages/Dashboard';
+import Businesses from '../super_admin/pages/Businesses';
+import UsageLogs from '../super_admin/pages/UsageLogs';
+import AIUsage from '../super_admin/pages/AIUsage';
+import Statistics from '../super_admin/pages/Statistics';
+import PlansBilling from '../super_admin/pages/PlansBilling';
+import AdminSettings from '../super_admin/pages/AdminSettings';
+
 function App() {
   return (
     <>
@@ -23,6 +33,17 @@ function App() {
         <Route path="/reports" element={<Page7 />} />
         <Route path="/assistant" element={<Page8 />} />
         <Route path="/settings" element={<Page9 />} />
+
+        {/* Super Admin Routes */}
+        <Route path="/admin" element={<SuperAdminLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="businesses" element={<Businesses />} />
+          <Route path="usage-logs" element={<UsageLogs />} />
+          <Route path="ai-usage" element={<AIUsage />} />
+          <Route path="statistics" element={<Statistics />} />
+          <Route path="plans" element={<PlansBilling />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
       </Routes>
     </>
   );

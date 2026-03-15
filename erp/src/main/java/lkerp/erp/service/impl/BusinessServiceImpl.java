@@ -2,10 +2,14 @@ package lkerp.erp.service.impl;
 
 import lkerp.erp.dto.BusinessDTO;
 import lkerp.erp.entity.Business;
+import lkerp.erp.entity.User;
+import lkerp.erp.exception.BadRequestException;
 import lkerp.erp.exception.ResourceNotFoundException;
 import lkerp.erp.repository.BusinessRepository;
+import lkerp.erp.repository.UserRepository;
 import lkerp.erp.service.BusinessService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,15 +21,33 @@ import java.util.stream.Collectors;
 public class BusinessServiceImpl implements BusinessService {
 
     private final BusinessRepository businessRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public BusinessDTO.Response createBusiness(BusinessDTO.Request request) {
+        if (userRepository.findByEmail(request.getOwnerEmail()).isPresent()) {
+            throw new BadRequestException("Owner email is already taken");
+        }
+
         Business business = new Business();
         business.setName(request.getName());
         business.setCurrency(request.getCurrency());
         business.setStatus(request.getStatus() != null ? request.getStatus() : "ACTIVE");
+        business.setPlan(request.getPlan());
+        business.setOwnerEmail(request.getOwnerEmail());
         
         Business saved = businessRepository.save(business);
+
+        User user = User.builder()
+                .email(request.getOwnerEmail())
+                .password(passwordEncoder.encode(request.getDefaultPassword()))
+                .role("BUSINESS_OWNER")
+                .business(saved)
+                .isActive(true)
+                .build();
+        userRepository.save(user);
+
         return mapToResponse(saved);
     }
 
@@ -72,6 +94,8 @@ public class BusinessServiceImpl implements BusinessService {
                 .name(business.getName())
                 .currency(business.getCurrency())
                 .status(business.getStatus())
+                .plan(business.getPlan())
+                .ownerEmail(business.getOwnerEmail())
                 .createdAt(business.getCreatedAt())
                 .build();
     }
