@@ -12,7 +12,26 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-chart-kit';
-import { COLORS, SPACING } from '../constants/theme';
+// Hardcoded theme constants to isolate import issues
+const COLORS = {
+  primary: '#2563eb',
+  background: '#f8fafc',
+  surface: '#ffffff',
+  text: '#1e293b',
+  textLight: '#64748b',
+  success: '#22c55e',
+  error: '#ef4444',
+  shadow: 'rgba(0, 0, 0, 0.05)',
+};
+
+const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+};
 import * as DashboardService from '../services/dashboard.service';
 import * as AuthService from '../services/auth.service';
 

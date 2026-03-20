@@ -2,9 +2,19 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, View, Text } from 'react-native';
 import DashboardScreen from '../screens/DashboardScreen';
-import { COLORS } from '../constants/theme';
+import InventoryScreen from '../screens/InventoryScreen';
 
 const Tab = createBottomTabNavigator();
+
+// Hardcoded theme constants to isolate import issues
+const THEME = {
+  primary: '#2563eb',
+  background: '#f8fafc',
+  surface: '#ffffff',
+  text: '#1e293b',
+  textLight: '#64748b',
+  border: '#e2e8f0',
+};
 
 // Placeholder screens for other tabs
 const PlaceholderScreen = ({ name }: { name: string }) => (
@@ -19,8 +29,8 @@ const MainTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textLight,
+        tabBarActiveTintColor: THEME.primary,
+        tabBarInactiveTintColor: THEME.textLight,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabBarLabel,
       }}
@@ -34,7 +44,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen 
         name="Inventory" 
-        children={() => <PlaceholderScreen name="Inventory" />} 
+        component={InventoryScreen} 
         options={{
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>📦</Text>,
         }}
@@ -66,9 +76,9 @@ const MainTabNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: THEME.surface,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: THEME.border,
     height: 60,
     paddingBottom: 8,
     paddingTop: 8,
@@ -81,16 +91,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: THEME.background,
   },
   placeholderText: {
     fontSize: 24,
     fontWeight: '800',
-    color: COLORS.text,
+    color: THEME.text,
   },
   placeholderSub: {
     fontSize: 16,
-    color: COLORS.textLight,
+    color: THEME.textLight,
     marginTop: 8,
   },
 });
