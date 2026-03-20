@@ -48,8 +48,8 @@ const KPICard = ({ title, value, color, icon }: any) => (
   </View>
 );
 
-const ActionButton = ({ title, icon, color }: any) => (
-  <TouchableOpacity style={styles.actionButton}>
+const ActionButton = ({ title, icon, color, onPress }: any) => (
+  <TouchableOpacity style={styles.actionButton} onPress={onPress}>
     <View style={[styles.actionIcon, { backgroundColor: color + '20' }]}>
        <Text style={{ color: color, fontSize: 18 }}>{icon}</Text>
     </View>
@@ -57,7 +57,7 @@ const ActionButton = ({ title, icon, color }: any) => (
   </TouchableOpacity>
 );
 
-const DashboardScreen = () => {
+const DashboardScreen = ({ navigation }: any) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -145,10 +145,10 @@ const DashboardScreen = () => {
         </View>
 
         <View style={styles.actionsGrid}>
-          <ActionButton title="Add Sale" icon="🛒" color="#3b82f6" />
-          <ActionButton title="Add Stock" icon="+" color="#10b981" />
-          <ActionButton title="Invoices" icon="📄" color="#f59e0b" />
-          <ActionButton title="Ask AI" icon="🤖" color="#8b5cf6" />
+          <ActionButton title="Add Sale" icon="🛒" color="#3b82f6" onPress={() => navigation.navigate('Sales')} />
+          <ActionButton title="Add Stock" icon="+" color="#10b981" onPress={() => navigation.navigate('Inventory')} />
+          <ActionButton title="Invoices" icon="📄" color="#f59e0b" onPress={() => navigation.navigate('Invoices')} />
+          <ActionButton title="Ask AI" icon="🤖" color="#8b5cf6" onPress={() => navigation.navigate('AI')} />
         </View>
 
         <View style={styles.chartSection}>
@@ -159,6 +159,7 @@ const DashboardScreen = () => {
               width={width - SPACING.lg * 2}
               height={220}
               yAxisLabel="Rs."
+              yAxisSuffix=""
               chartConfig={{
                 backgroundColor: COLORS.surface,
                 backgroundGradientFrom: COLORS.surface,
