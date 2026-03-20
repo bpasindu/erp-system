@@ -4,6 +4,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import DashboardScreen from '../screens/DashboardScreen';
 import InventoryScreen from '../screens/InventoryScreen';
 import SalesScreen from '../screens/SalesScreen';
+import InvoicesScreen from '../screens/InvoicesScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -59,7 +60,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen 
         name="Invoices" 
-        children={() => <PlaceholderScreen name="Invoices" />} 
+        component={InvoicesScreen} 
         options={{
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>📄</Text>,
         }}
