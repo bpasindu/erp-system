@@ -8,6 +8,10 @@ export const COLORS = {
   error: '#ef4444', // Red 500
   success: '#22c55e', // Green 500
   border: '#e2e8f0', // Slate 200
+  card: '#ffffff',
+  shadow: 'rgba(0, 0, 0, 0.05)',
+  accent: '#3b82f6', // Blue 500
+  neutral: '#94a3b8', // Slate 400
 };
 
 export const SPACING = {

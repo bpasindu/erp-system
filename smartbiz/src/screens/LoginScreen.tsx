@@ -32,8 +32,13 @@ const LoginScreen = ({ navigation }: any) => {
     try {
       const result = await AuthService.login({ email, password });
       console.log('Login success:', result);
-      // Navigate to Dashboard (if implemented) or show success
-      Alert.alert('Success', 'Welcome back, ' + result.email);
+      
+      if (result.role === 'BUSINESS_OWNER') {
+        navigation.replace('Main');
+      } else {
+        await AuthService.logout();
+        Alert.alert('Access Denied', 'Only business owners can access this dashboard.');
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       Alert.alert('Login Failed', error.message || 'Something went wrong');

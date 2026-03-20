@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from './api';
 
 export interface LoginRequest {
@@ -22,8 +23,21 @@ export interface ApiResponse<T> {
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', data);
   if (response.data.success) {
-    return response.data.data;
+    const authData = response.data.data;
+    await AsyncStorage.setItem('token', authData.token);
+    await AsyncStorage.setItem('user', JSON.stringify(authData));
+    return authData;
   } else {
     throw new Error(response.data.message || 'Login failed');
   }
+};
+
+export const getUser = async (): Promise<AuthResponse | null> => {
+  const user = await AsyncStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
+};
+
+export const logout = async () => {
+  await AsyncStorage.removeItem('token');
+  await AsyncStorage.removeItem('user');
 };
