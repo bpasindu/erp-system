@@ -5,6 +5,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import InventoryScreen from '../screens/InventoryScreen';
 import SalesScreen from '../screens/SalesScreen';
 import InvoicesScreen from '../screens/InvoicesScreen';
+import AIScreen from '../screens/AIScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -67,7 +68,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen 
         name="AI" 
-        children={() => <PlaceholderScreen name="AI" />} 
+        component={AIScreen} 
         options={{
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>🤖</Text>,
         }}
