@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, View, Text } from 'react-native';
 import DashboardScreen from '../screens/DashboardScreen';
 import InventoryScreen from '../screens/InventoryScreen';
+import SalesScreen from '../screens/SalesScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -51,7 +52,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen 
         name="Sales" 
-        children={() => <PlaceholderScreen name="Sales" />} 
+        component={SalesScreen} 
         options={{
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>🛒</Text>,
         }}
