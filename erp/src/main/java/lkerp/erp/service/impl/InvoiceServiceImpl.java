@@ -114,6 +114,20 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public List<InvoiceDTO.Response> getUnpaidInvoicesByBusiness(Long businessId) {
+        return invoiceRepository.findByBusinessIdAndStatus(businessId, "UNPAID").stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InvoiceDTO.Response> getUnpaidInvoicesByCustomer(Long customerId) {
+        return invoiceRepository.findByCustomerIdAndStatus(customerId, "UNPAID").stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteInvoice(Long id) {
         if (!invoiceRepository.existsById(id)) {
             throw new ResourceNotFoundException("Invoice not found id: " + id);

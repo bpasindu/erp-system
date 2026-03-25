@@ -110,6 +110,33 @@ const AIScreen = () => {
     }
   };
 
+  const handleEmailAutomation = async () => {
+    setLoading(true);
+    try {
+      const auth = await AuthService.getUser();
+      if (!auth || !auth.businessId) throw new Error('Not authenticated');
+
+      await AIService.triggerEmailAutomation(auth.businessId, auth.userId);
+
+      const aiMsg: ChatMessage = {
+        id: `ai-n8n-${Date.now()}`,
+        role: 'assistant',
+        text: "🚀 Automated Email Campaign triggered! n8n is now processing unpaid invoices and supplier delays. You'll receive a notification once complete.",
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (error: any) {
+      const errMsg: ChatMessage = {
+        id: `err-n8n-${Date.now()}`,
+        role: 'assistant',
+        text: "Failed to trigger the email automation. Please check your n8n webhook configuration.",
+      };
+      setMessages((prev) => [...prev, errMsg]);
+    } finally {
+      setLoading(false);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
+    }
+  };
+
   const showSuggestions = messages.length <= 1;
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
@@ -183,8 +210,20 @@ const AIScreen = () => {
         }
       />
 
+      {/* Quick Actions */}
+      <View style={styles.suggestionsSection}>
+        <Text style={styles.suggestionsLabel}>Quick Actions:</Text>
+        <TouchableOpacity
+          style={[styles.suggestionChip, { backgroundColor: COLORS.primary + '10', borderColor: COLORS.primary }]}
+          onPress={handleEmailAutomation}
+        >
+          <Text style={[styles.suggestionText, { color: COLORS.primary }]}>📧 Trigger Email Campaign (n8n)</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Suggested Prompts */}
       {showSuggestions && (
+
         <View style={styles.suggestionsSection}>
           <Text style={styles.suggestionsLabel}>Try asking:</Text>
           {SUGGESTED_PROMPTS.map((prompt) => (

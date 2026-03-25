@@ -50,3 +50,22 @@ export const getAIHistory = async (businessId: number): Promise<AIMessage[]> => 
     return [];
   }
 };
+export const triggerEmailAutomation = async (
+  businessId: number,
+  userId: number,
+): Promise<any> => {
+  // This URL should be replaced with the actual n8n Webhook URL
+  const N8N_WEBHOOK_URL = 'https://n8n.your-domain.com/webhook/trigger-emails';
+  
+  try {
+    const response = await api.post(N8N_WEBHOOK_URL, {
+      businessId,
+      userId,
+      timestamp: new Date().toISOString(),
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error triggering n8n email automation:', error);
+    throw error;
+  }
+};
