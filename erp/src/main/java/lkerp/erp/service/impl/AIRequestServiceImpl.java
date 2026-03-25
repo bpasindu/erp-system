@@ -65,6 +65,7 @@ public class AIRequestServiceImpl implements AIRequestService {
                 .build();
 
         String generatedResponse = "";
+        String imageUrl = null;
         int tokensUsed = 0;
         
         try {
@@ -75,6 +76,29 @@ public class AIRequestServiceImpl implements AIRequestService {
             List<Map<String, Object>> messages = new ArrayList<>();
             Map<String, Object> body = new HashMap<>();
             body.put("model", "gpt-4o-mini");
+            
+            if ("MARKETING".equals(request.getRequestType())) {
+                try {
+                    Map<String, Object> imgBody = new HashMap<>();
+                    imgBody.put("model", "dall-e-3");
+                    imgBody.put("prompt", "Generate a high quality, professional marketing image for: " + request.getPrompt());
+                    imgBody.put("n", 1);
+                    imgBody.put("size", "1024x1024");
+                    
+                    HttpEntity<Map<String, Object>> imgEntity = new HttpEntity<>(imgBody, headers);
+                    ResponseEntity<Map> imgResponse = restTemplate.exchange("https://api.openai.com/v1/images/generations", HttpMethod.POST, imgEntity, Map.class);
+                    Map<String, Object> imgBodyRes = imgResponse.getBody();
+                    
+                    if (imgBodyRes != null && imgBodyRes.containsKey("data")) {
+                        List<Map<String, Object>> imgData = (List<Map<String, Object>>) imgBodyRes.get("data");
+                        if (!imgData.isEmpty()) {
+                            imageUrl = (String) imgData.get(0).get("url");
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Image generation failed: " + e.getMessage());
+                }
+            }
             
             if ("CHAT".equals(request.getRequestType()) || "INSIGHT".equals(request.getRequestType())) {
                 StringBuilder schemaBuilder = new StringBuilder();
@@ -218,8 +242,12 @@ public class AIRequestServiceImpl implements AIRequestService {
 
         aiReq.setStatus("SUCCESS");
         aiReq.setResponse(generatedResponse);
+        if (imageUrl != null) aiReq.setImageUrl(imageUrl);
         aiReq.setTokensUsed(tokensUsed);
-        aiReq.setCostEstimate((tokensUsed / 1000000.0) * 0.15);
+        
+        double textCost = (tokensUsed / 1000000.0) * 0.15;
+        double imgCost = (imageUrl != null) ? 0.040 : 0.0;
+        aiReq.setCostEstimate(textCost + imgCost);
 
         AIRequest saved = aiRequestRepository.save(aiReq);
         return mapToResponse(saved);
@@ -240,6 +268,7 @@ public class AIRequestServiceImpl implements AIRequestService {
                 .userId(req.getUser().getId())
                 .prompt(req.getPrompt())
                 .response(req.getResponse())
+                .imageUrl(req.getImageUrl())
                 .requestType(req.getRequestType())
                 .tokensUsed(req.getTokensUsed())
                 .costEstimate(req.getCostEstimate())

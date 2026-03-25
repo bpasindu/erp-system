@@ -27,6 +27,11 @@ const AiAssistantPage = () => {
   const [supplierGenerateLoading, setSupplierGenerateLoading] = useState(false);
   const [supplierGenerateStatus, setSupplierGenerateStatus] = useState('');
   const [supplierGenerateResult, setSupplierGenerateResult] = useState('');
+  const [supplierEmailType, setSupplierEmailType] = useState('Add Order');
+  const [supplierCustomInfo, setSupplierCustomInfo] = useState('');
+
+  // Customer custom text
+  const [customerCustomInfo, setCustomerCustomInfo] = useState('');
 
   // Insights Chat State
   const [chatInput, setChatInput] = useState('');
@@ -38,7 +43,9 @@ const AiAssistantPage = () => {
   const [marketingTheme, setMarketingTheme] = useState('New Arrivals');
   const [marketingTone, setMarketingTone] = useState('Excited');
   const [marketingEmojis, setMarketingEmojis] = useState(true);
+  const [marketingPrompt, setMarketingPrompt] = useState('');
   const [marketingResult, setMarketingResult] = useState('');
+  const [marketingImageUrl, setMarketingImageUrl] = useState('');
   const [marketingLoading, setMarketingLoading] = useState(false);
 
   const user = (() => {
@@ -98,11 +105,11 @@ const AiAssistantPage = () => {
       const customerInfo = customers.find(c => String(c.id) === String(selectedCustomer));
       const customerName = customerInfo ? customerInfo.name : 'Unknown';
       
-      const prompt = `Write a ${tone} ${goal} email to my customer named ${customerName}. Key points to include: ${keyPoints}. Keep the tone appropriate for a business setting.`;
+      const prompt = `Write a ${tone} ${goal} email to my customer named ${customerName}. Specific instructions about what to inform the customer: "${customerCustomInfo}". Key points: ${keyPoints}. Keep the tone appropriate for a business setting.`;
       
       const result = await callNativeAI(prompt, 'EMAIL');
       
-      setGenerateResult(result);
+      setGenerateResult(result?.response || '');
       setGenerateStatus('✅ Email generated successfully!');
       setTimeout(() => setGenerateStatus(''), 5000);
     } catch (error) {
@@ -135,8 +142,13 @@ const AiAssistantPage = () => {
   };
 
   const handleGenerateSupplierEmail = async () => {
-    if (!selectedSupplier || orderItems.length === 0) {
-      setSupplierGenerateStatus('⚠️ Please select a supplier and add at least one product.');
+    if (!selectedSupplier) {
+      setSupplierGenerateStatus('⚠️ Please select a supplier.');
+      setTimeout(() => setSupplierGenerateStatus(''), 3000);
+      return;
+    }
+    if (supplierEmailType === 'Add Order' && orderItems.length === 0) {
+      setSupplierGenerateStatus('⚠️ Please add at least one product for the order.');
       setTimeout(() => setSupplierGenerateStatus(''), 3000);
       return;
     }
@@ -149,12 +161,21 @@ const AiAssistantPage = () => {
       const supplierInfo = suppliers.find(s => String(s.id) === String(selectedSupplier));
       const supplierName = supplierInfo ? supplierInfo.name : 'Unknown';
       
-      const itemsList = orderItems.map(item => `${item.productName} (Quantity: ${item.quantity})`).join('\\n- ');
-      const prompt = `Write a formal, professional order email to our supplier, ${supplierName}. Request to order the following products:\n- ${itemsList}\nAsk for confirmation of the order and estimated delivery time.`;
+      let prompt = `Write a formal, professional email to our supplier, ${supplierName}. `;
+      if (supplierEmailType === 'Add Order') {
+         const itemsList = orderItems.map(item => `${item.productName} (Quantity: ${item.quantity})`).join('\\n- ');
+         prompt += `Request to order the following products:\n- ${itemsList}\nAsk for confirmation of the order and estimated delivery time. `;
+      } else {
+         prompt += `The main purpose of this email is to follow up and hurry up a pre-order or pending delivery. `;
+      }
+      
+      if (supplierCustomInfo.trim() !== '') {
+         prompt += `\nSpecific information to inform the supplier: "${supplierCustomInfo}".`;
+      }
       
       const result = await callNativeAI(prompt, 'EMAIL');
       
-      setSupplierGenerateResult(result);
+      setSupplierGenerateResult(result?.response || '');
       setSupplierGenerateStatus('✅ Order email generated successfully!');
       setTimeout(() => setSupplierGenerateStatus(''), 5000);
     } catch (error) {
@@ -181,7 +202,7 @@ const AiAssistantPage = () => {
       })
     });
     const data = await res.json();
-    return data.data.response;
+    return data.data;
   };
 
   const handleSendChatMessage = async () => {
@@ -193,12 +214,12 @@ const AiAssistantPage = () => {
 
     try {
       const prompt = `You are a helpful ERP AI assistant for a business using SmartBiz software. Answer the user's question concisely. Question: ${chatInput}`;
-      const reply = await callNativeAI(prompt, 'CHAT');
+      const replyData = await callNativeAI(prompt, 'CHAT');
       // If reply is undefined, it means the API call failed silently
-      if (!reply) {
+      if (!replyData || !replyData.response) {
         throw new Error("Empty reply");
       }
-      setChatHistory(prev => [...prev, { role: 'bot', text: reply }]);
+      setChatHistory(prev => [...prev, { role: 'bot', text: replyData.response }]);
     } catch (err) {
       console.error(err);
       setChatHistory(prev => [...prev, { role: 'bot', text: 'Sorry, I encountered an error connecting to the AI.' }]);
@@ -209,11 +230,16 @@ const AiAssistantPage = () => {
 
   const handleGenerateMarketingPost = async () => {
     setMarketingLoading(true);
-    setMarketingResult('Generating your perfectly crafted post...');
+    setMarketingResult('Generating your perfectly crafted post and image...');
+    setMarketingImageUrl('');
     try {
-       const prompt = `Write a ${marketingTone} promotional marketing post for ${marketingPlatform} about ${marketingTheme}. ${marketingEmojis ? 'Include appropriate emojis.' : 'Do NOT include emojis.'} Keep it high-converting, strictly professional yet engaging, and under 3 short paragraphs.`;
+       let prompt = `Write a ${marketingTone} promotional marketing post for ${marketingPlatform} about ${marketingTheme}. ${marketingEmojis ? 'Include appropriate emojis.' : 'Do NOT include emojis.'} Keep it high-converting, strictly professional yet engaging, and under 3 short paragraphs. `;
+       if (marketingPrompt.trim()) {
+           prompt += `\nSpecific details for the post and image: "${marketingPrompt}"`;
+       }
        const result = await callNativeAI(prompt, 'MARKETING');
-       setMarketingResult(result);
+       setMarketingResult(result?.response || '');
+       setMarketingImageUrl(result?.imageUrl || '');
     } catch (err) {
        setMarketingResult('Failed to generate marketing post. Check backend connection.');
     } finally {
@@ -327,9 +353,18 @@ const AiAssistantPage = () => {
                   ))}
                 </select>
               </div>
+              <div className="form-group">
+                <label>Email Reason</label>
+                <select value={supplierEmailType} onChange={(e) => setSupplierEmailType(e.target.value)}>
+                  <option value="Add Order">1. Add Order</option>
+                  <option value="Hurry up pre-order">2. Hurry up pre-order</option>
+                </select>
+              </div>
             </div>
 
-            <div className="ai-grid" style={{ marginBottom: '1rem', alignItems: 'end' }}>
+            {supplierEmailType === 'Add Order' && (
+              <>
+                <div className="ai-grid" style={{ marginBottom: '1rem', alignItems: 'end' }}>
               <div className="form-group">
                 <label>Product</label>
                 <select value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)}>
@@ -379,12 +414,25 @@ const AiAssistantPage = () => {
                 </ul>
               </div>
             )}
+              </>
+            )}
+
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label>What information to inform the supplier?</label>
+              <textarea 
+                rows="3"
+                placeholder="e.g. We need this urgently delivered by Friday, please expedite..."
+                value={supplierCustomInfo}
+                onChange={(e) => setSupplierCustomInfo(e.target.value)}
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', resize: 'vertical' }}
+              />
+            </div>
 
             <button 
               type="button" 
               className="btn btn-primary" 
               onClick={handleGenerateSupplierEmail}
-              disabled={supplierGenerateLoading || orderItems.length === 0 || !selectedSupplier}
+              disabled={supplierGenerateLoading || (supplierEmailType === 'Add Order' && orderItems.length === 0) || !selectedSupplier}
               style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: '#422006' }}
             >
               {supplierGenerateLoading ? 'Generating...' : '📦 Generate Supplier Email'}
@@ -429,12 +477,14 @@ const AiAssistantPage = () => {
                   <option value="Apology">Apology</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label>Key Points</label>
-                <input 
-                  placeholder="Main points to include..." 
-                  value={keyPoints}
-                  onChange={(e) => setKeyPoints(e.target.value)}
+              <div className="form-group" style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                <label>What information should be in the email?</label>
+                <textarea 
+                  rows="3"
+                  placeholder="e.g. Tell them about their upcoming shipment, give them a special dynamic discount..."
+                  value={customerCustomInfo}
+                  onChange={(e) => setCustomerCustomInfo(e.target.value)}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', resize: 'vertical' }}
                 />
               </div>
             </div>
@@ -498,6 +548,16 @@ const AiAssistantPage = () => {
                   <span className="slider" />
                 </label>
               </div>
+              <div className="form-group" style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                <label>Specific Product / Content Details (Used for Post and Image)</label>
+                <textarea 
+                  rows="3"
+                  placeholder="e.g. Emphasize the new elegant golden watch resting on velvet..."
+                  value={marketingPrompt}
+                  onChange={e => setMarketingPrompt(e.target.value)}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', resize: 'vertical' }}
+                />
+              </div>
             </div>
             <button 
               type="button" 
@@ -511,6 +571,11 @@ const AiAssistantPage = () => {
             {marketingResult && (
               <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
                 <h4 style={{ margin: '0 0 0.5rem 0', color: '#334155', fontSize: '0.9rem' }}>Generated Post:</h4>
+                {marketingImageUrl && (
+                  <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+                    <img src={marketingImageUrl} alt="Generated Marketing" style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                  </div>
+                )}
                 <div style={{ whiteSpace: 'pre-wrap', color: '#0f172a', fontSize: '0.95rem', lineHeight: '1.5' }}>
                   {marketingResult}
                 </div>

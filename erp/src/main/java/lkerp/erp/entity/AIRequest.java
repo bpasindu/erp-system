@@ -29,6 +29,9 @@ public class AIRequest {
     @Lob
     private String response;
 
+    @Lob
+    private String imageUrl;
+
     private String requestType; // EMAIL, INSIGHT, SUMMARY, MARKETING
     private Integer tokensUsed;
     private Double costEstimate;

@@ -39,6 +39,7 @@ public class AIRequestDTO {
         private Long userId;
         private String prompt;
         private String response;
+        private String imageUrl;
         private String requestType;
         private Integer tokensUsed;
         private Double costEstimate;
