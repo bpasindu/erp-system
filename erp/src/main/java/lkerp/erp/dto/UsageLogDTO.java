@@ -15,8 +15,13 @@ public class UsageLogDTO {
     public static class Response {
         private Long id;
         private Long businessId;
+        private String businessName;
         private Long userId;
+        private String userName;
         private String action;
+        private String module;
+        private String ip;
+        private String result;
         private String description;
         private LocalDateTime createdAt;
     }

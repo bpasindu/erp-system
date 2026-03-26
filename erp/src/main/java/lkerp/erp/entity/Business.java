@@ -25,6 +25,9 @@ public class Business {
     @Column(name = "owner_email")
     private String ownerEmail;
 
+    @Column(name = "business_email")
+    private String email;
+
     @Column(name = "created_at")
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

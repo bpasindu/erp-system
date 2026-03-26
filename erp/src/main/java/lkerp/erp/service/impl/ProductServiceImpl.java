@@ -71,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product saved = productRepository.save(product);
         
-        usageLogService.log(business.getId(), null, "CREATE_PRODUCT", "Created new product: " + saved.getName());
+        usageLogService.log(business.getId(), null, "CREATE_PRODUCT", "Created new product: " + saved.getName(), "Inventory", "127.0.0.1", "Success");
 
         return mapToResponse(saved);
     }
@@ -132,7 +132,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product updated = productRepository.save(product);
 
-        usageLogService.log(updated.getBusiness().getId(), null, "UPDATE_PRODUCT", "Updated product: " + updated.getName());
+        usageLogService.log(updated.getBusiness().getId(), null, "UPDATE_PRODUCT", "Updated product: " + updated.getName(), "Inventory", "127.0.0.1", "Success");
 
         return mapToResponse(updated);
     }
@@ -146,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
         
         productRepository.deleteById(id);
 
-        usageLogService.log(businessId, null, "DELETE_PRODUCT", "Deleted product: " + name);
+        usageLogService.log(businessId, null, "DELETE_PRODUCT", "Deleted product: " + name, "Inventory", "127.0.0.1", "Success");
     }
 
     private ProductDTO.Response mapToResponse(Product product) {

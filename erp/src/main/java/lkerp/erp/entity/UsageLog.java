@@ -24,6 +24,10 @@ public class UsageLog {
 
     private String action;
     
+    private String module;
+    private String ip;
+    private String result;
+    
     @Column(length = 1000)
     private String description;
 

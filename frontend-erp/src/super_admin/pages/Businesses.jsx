@@ -160,6 +160,7 @@ const Businesses = () => {
           <thead>
             <tr>
               <th>Business Name</th>
+              <th>Business Email</th>
               <th>Owner Email</th>
               <th>Plan</th>
               <th>Status</th>
@@ -178,6 +179,7 @@ const Businesses = () => {
                   <td>
                     <strong>{b.name}</strong>
                   </td>
+                  <td>{b.email || '—'}</td>
                   <td>{b.ownerEmail || '—'}</td>
                   <td>
                     <span className={`sa-plan-badge ${(b.plan || 'Free').toLowerCase()}`}>{b.plan || 'Free'}</span>

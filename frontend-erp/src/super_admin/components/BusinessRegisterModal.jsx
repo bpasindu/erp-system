@@ -10,6 +10,7 @@ const BusinessRegisterModal = ({ onClose, onSuccess }) => {
   const [status, setStatus] = useState('ACTIVE');
   const [defaultPassword, setDefaultPassword] = useState('');
   const [currency, setCurrency] = useState('LKR');
+  const [email, setEmail] = useState('');
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,7 @@ const BusinessRegisterModal = ({ onClose, onSuccess }) => {
         status,
         plan,
         ownerEmail,
+        email,
         defaultPassword
       };
 
@@ -86,15 +88,26 @@ const BusinessRegisterModal = ({ onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="sa-form-group">
-            <label>Owner Email</label>
-            <input 
-              type="email" 
-              required 
-              placeholder="owner@acme.com"
-              value={ownerEmail} 
-              onChange={e => setOwnerEmail(e.target.value)} 
-            />
+          <div className="sa-form-row">
+            <div className="sa-form-group">
+              <label>Owner Email (Login)</label>
+              <input 
+                type="email" 
+                required 
+                placeholder="owner@acme.com"
+                value={ownerEmail} 
+                onChange={e => setOwnerEmail(e.target.value)} 
+              />
+            </div>
+            <div className="sa-form-group">
+              <label>Business Email (General)</label>
+              <input 
+                type="email" 
+                placeholder="info@acme.com"
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+              />
+            </div>
           </div>
 
           <div className="sa-form-row">
