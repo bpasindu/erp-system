@@ -44,6 +44,20 @@ public class AIRequestDTO {
         private Integer tokensUsed;
         private Double costEstimate;
         private String status;
+        private String businessName;
+        private Boolean isFlagged;
+        private Boolean isReviewed;
         private LocalDateTime createdAt;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Summary {
+        private Long totalRequests;
+        private Double avgRequestsPerBusiness;
+        private String topFeature;
+        private Double totalCostEstimate;
     }
 }

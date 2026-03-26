@@ -251,6 +251,7 @@ public class AIRequestServiceImpl implements AIRequestService {
         aiReq.setResponse(generatedResponse);
         if (imageUrl != null) aiReq.setImageUrl(imageUrl);
         aiReq.setTokensUsed(tokensUsed);
+        if (tokensUsed > 2000) aiReq.setIsFlagged(true);
         
         double textCost = (tokensUsed / 1000000.0) * 0.15;
         double imgCost = (imageUrl != null) ? 0.040 : 0.0;
@@ -262,17 +263,66 @@ public class AIRequestServiceImpl implements AIRequestService {
 
     @Override
     public List<AIRequestDTO.Response> getRequestsByBusiness(Long businessId) {
-        return aiRequestRepository.findAll().stream()
+        return aiRequestRepository.findAllByOrderByCreatedAtDesc().stream()
                 .filter(r -> r.getBusiness().getId().equals(businessId))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AIRequestDTO.Response> getAllRequests() {
+        return aiRequestRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AIRequestDTO.Response> getFlaggedRequests() {
+        return aiRequestRepository.findByIsFlaggedTrueAndIsReviewedFalseOrderByCreatedAtDesc().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AIRequestDTO.Response markAsReviewed(Long id) {
+        AIRequest req = aiRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AI Request not found"));
+        req.setIsReviewed(true);
+        return mapToResponse(aiRequestRepository.save(req));
+    }
+
+    @Override
+    public AIRequestDTO.Summary getAIUsageSummary() {
+        long totalRequests = aiRequestRepository.count();
+        long businessCount = businessRepository.count();
+        double avg = businessCount > 0 ? (double) totalRequests / businessCount : 0.0;
+        
+        List<AIRequest> all = aiRequestRepository.findAll();
+        Map<String, Long> counts = all.stream()
+                .collect(Collectors.groupingBy(r -> r.getRequestType() != null ? r.getRequestType() : "Unknown", Collectors.counting()));
+        String topFeature = counts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("N/A");
+                
+        double totalCost = all.stream()
+                .mapToDouble(r -> r.getCostEstimate() != null ? r.getCostEstimate() : 0.0)
+                .sum();
+
+        return AIRequestDTO.Summary.builder()
+                .totalRequests(totalRequests)
+                .avgRequestsPerBusiness(avg)
+                .topFeature(topFeature)
+                .totalCostEstimate(totalCost)
+                .build();
     }
 
     private AIRequestDTO.Response mapToResponse(AIRequest req) {
         return AIRequestDTO.Response.builder()
                 .id(req.getId())
                 .businessId(req.getBusiness().getId())
-                .userId(req.getUser().getId())
+                .businessName(req.getBusiness().getName())
+                .userId(req.getUser() != null ? req.getUser().getId() : null)
                 .prompt(req.getPrompt())
                 .response(req.getResponse())
                 .imageUrl(req.getImageUrl())
@@ -280,6 +330,8 @@ public class AIRequestServiceImpl implements AIRequestService {
                 .tokensUsed(req.getTokensUsed())
                 .costEstimate(req.getCostEstimate())
                 .status(req.getStatus())
+                .isFlagged(req.getIsFlagged())
+                .isReviewed(req.getIsReviewed())
                 .createdAt(req.getCreatedAt())
                 .build();
     }

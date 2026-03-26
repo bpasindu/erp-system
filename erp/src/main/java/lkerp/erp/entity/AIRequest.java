@@ -36,6 +36,12 @@ public class AIRequest {
     private Integer tokensUsed;
     private Double costEstimate;
     private String status; // SUCCESS, FAILED, PENDING
+    
+    @Builder.Default
+    private Boolean isFlagged = false;
+    
+    @Builder.Default
+    private Boolean isReviewed = false;
 
     @Column(name = "created_at")
     @Builder.Default
