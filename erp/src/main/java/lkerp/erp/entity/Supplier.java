@@ -24,6 +24,9 @@ public class Supplier {
     private String phone;
     private String address;
 
+    @Lob
+    private String notes;
+
     @Column(name = "created_at")
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

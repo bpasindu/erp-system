@@ -5,9 +5,10 @@ import lkerp.erp.entity.Business;
 import lkerp.erp.entity.Product;
 import lkerp.erp.entity.ProductCategory;
 import lkerp.erp.exception.ResourceNotFoundException;
-import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.repository.ProductCategoryRepository;
 import lkerp.erp.repository.ProductRepository;
+import lkerp.erp.repository.SupplierRepository;
+import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.service.ProductService;
 import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
     private final ProductCategoryRepository categoryRepository;
+    private final SupplierRepository supplierRepository;
     private final UsageLogService usageLogService;
 
     @Override
@@ -37,10 +39,17 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
         }
 
+        lkerp.erp.entity.Supplier supplier = null;
+        if (request.getSupplierId() != null) {
+            supplier = supplierRepository.findById(request.getSupplierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + request.getSupplierId()));
+        }
+
         int initialStock = request.getStockQuantity() != null ? request.getStockQuantity() : 0;
         Product product = Product.builder()
                 .business(business)
                 .category(category)
+                .supplier(supplier)
                 .name(request.getName())
                 .sku(request.getSku())
                 .description(request.getDescription())
@@ -73,6 +82,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductDTO.Response> getProductsBySupplier(Long supplierId) {
+        return productRepository.findBySupplierId(supplierId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ProductDTO.Response updateProduct(Long id, ProductDTO.Request request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
@@ -83,7 +99,14 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
         }
 
+        lkerp.erp.entity.Supplier supplier = null;
+        if (request.getSupplierId() != null) {
+            supplier = supplierRepository.findById(request.getSupplierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + request.getSupplierId()));
+        }
+
         product.setCategory(category);
+        product.setSupplier(supplier);
         product.setName(request.getName());
         product.setSku(request.getSku());
         product.setDescription(request.getDescription());
@@ -117,6 +140,7 @@ public class ProductServiceImpl implements ProductService {
                 .id(product.getId())
                 .businessId(product.getBusiness().getId())
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .supplierId(product.getSupplier() != null ? product.getSupplier().getId() : null)
                 .name(product.getName())
                 .sku(product.getSku())
                 .description(product.getDescription())

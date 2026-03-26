@@ -24,6 +24,10 @@ public class Product {
     @JoinColumn(name = "category_id")
     private ProductCategory category;
 
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
     private String name;
     private String sku;
     private String description;

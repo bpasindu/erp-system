@@ -32,6 +32,7 @@ public class SupplierServiceImpl implements SupplierService {
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .address(request.getAddress())
+                .notes(request.getNotes())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -63,6 +64,7 @@ public class SupplierServiceImpl implements SupplierService {
         supplier.setEmail(request.getEmail());
         supplier.setPhone(request.getPhone());
         supplier.setAddress(request.getAddress());
+        supplier.setNotes(request.getNotes());
 
         Supplier updated = supplierRepository.save(supplier);
         return mapToResponse(updated);
@@ -84,6 +86,7 @@ public class SupplierServiceImpl implements SupplierService {
                 .email(supplier.getEmail())
                 .phone(supplier.getPhone())
                 .address(supplier.getAddress())
+                .notes(supplier.getNotes())
                 .createdAt(supplier.getCreatedAt())
                 .build();
     }

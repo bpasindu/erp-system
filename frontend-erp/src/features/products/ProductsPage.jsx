@@ -41,6 +41,7 @@ const ProductsPage = () => {
   const [error, setError] = useState('');
   const [modalError, setModalError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [stockModalProduct, setStockModalProduct] = useState(null);
   const [search, setSearch] = useState('');
@@ -87,6 +88,16 @@ const ProductsPage = () => {
 
       const normalized = normalizeProducts(data.data || []);
       setProducts(normalized);
+
+      // Load Suppliers
+      const supRes = await fetch(`${API_BASE}/api/suppliers/business/${businessId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const supData = await supRes.json();
+      if (supData.success) {
+        setSuppliers(supData.data || []);
+      }
+
     } catch (e) {
       setError('Network error while loading products.');
     } finally {
@@ -148,9 +159,9 @@ const ProductsPage = () => {
       price: Number(form.sellingPrice) || 0,
       cost: Number(form.buyingPrice) || 0,
       stockQuantity: Number(form.stockQty ?? 0),
+      supplierId: form.supplierId ? Number(form.supplierId) : null,
       description: JSON.stringify({
         category: form.category || '',
-        supplier: form.supplier || '',
         reorderLevel: Number(form.reorderLevel ?? 0),
       }),
     };
@@ -353,7 +364,7 @@ const ProductsPage = () => {
                 name: editingProduct.name || '',
                 sku: editingProduct.sku || '',
                 category: editingProduct.category || '',
-                supplier: editingProduct.supplier || '',
+                supplierId: editingProduct.supplierId || '',
                 buyingPrice: editingProduct.cost ?? '',
                 sellingPrice: editingProduct.price ?? '',
                 stockQty: editingProduct.stockQty ?? '',
@@ -362,6 +373,7 @@ const ProductsPage = () => {
             : null
         }
         title={editingProduct ? 'Edit Product' : 'Add Product'}
+        suppliers={suppliers}
       />
 
       <AdjustStockModal

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import '../products/ProductsPage.css';
 import './AiAssistantPage.css';
 
@@ -56,6 +57,19 @@ const AiAssistantPage = () => {
     }
   })();
   const token = localStorage.getItem('token');
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.prefillEntity && location.state?.type) {
+      setActiveTab('email');
+      if (location.state.type === 'customers') {
+        setSelectedCustomer(location.state.prefillEntity.id);
+      } else if (location.state.type === 'suppliers') {
+        setSelectedSupplier(location.state.prefillEntity.id);
+      }
+      window.scrollTo(0, 0);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchEntities = async () => {

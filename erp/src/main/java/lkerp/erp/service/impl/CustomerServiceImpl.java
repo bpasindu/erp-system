@@ -32,6 +32,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .address(request.getAddress())
+                .notes(request.getNotes())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -63,6 +64,7 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setEmail(request.getEmail());
         customer.setPhone(request.getPhone());
         customer.setAddress(request.getAddress());
+        customer.setNotes(request.getNotes());
 
         Customer updated = customerRepository.save(customer);
         return mapToResponse(updated);
@@ -84,6 +86,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
                 .address(customer.getAddress())
+                .notes(customer.getNotes())
                 .createdAt(customer.getCreatedAt())
                 .build();
     }

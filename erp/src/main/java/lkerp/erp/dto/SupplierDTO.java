@@ -28,6 +28,7 @@ public class SupplierDTO {
 
         private String phone;
         private String address;
+        private String notes;
     }
 
     @Data
@@ -41,6 +42,7 @@ public class SupplierDTO {
         private String email;
         private String phone;
         private String address;
+        private String notes;
         private LocalDateTime createdAt;
     }
 }

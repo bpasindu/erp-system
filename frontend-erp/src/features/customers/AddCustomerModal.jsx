@@ -15,14 +15,19 @@ const AddCustomerModal = ({
   loading,
   error,
   activeTab,
+  initialValues,
 }) => {
   const [form, setForm] = useState(initialForm);
 
   useEffect(() => {
     if (isOpen) {
-      setForm(initialForm);
+      if (initialValues) {
+        setForm({ ...initialForm, ...initialValues });
+      } else {
+        setForm(initialForm);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialValues]);
 
   if (!isOpen) return null;
 
@@ -36,7 +41,13 @@ const AddCustomerModal = ({
     onSave(form);
   };
 
-  const title = activeTab === 'suppliers' ? 'Add Supplier' : 'Add Customer';
+  const title = initialValues
+    ? activeTab === 'suppliers'
+      ? 'Edit Supplier'
+      : 'Edit Customer'
+    : activeTab === 'suppliers'
+    ? 'Add Supplier'
+    : 'Add Customer';
 
   return (
     <div className="modal-overlay">

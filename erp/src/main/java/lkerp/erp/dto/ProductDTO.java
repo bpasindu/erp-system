@@ -22,6 +22,7 @@ public class ProductDTO {
         private Long businessId;
 
         private Long categoryId;
+        private Long supplierId;
 
         @NotBlank(message = "Name is required")
         private String name;
@@ -49,6 +50,7 @@ public class ProductDTO {
         private Long id;
         private Long businessId;
         private Long categoryId;
+        private Long supplierId;
         private String name;
         private String sku;
         private String description;
