@@ -17,6 +17,8 @@ public class CustomerDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Request {
+        private Long id; // Used for updates
+
         @NotNull(message = "Business ID is required")
         private Long businessId;
 

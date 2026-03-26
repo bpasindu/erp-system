@@ -7,7 +7,7 @@ export interface Product {
   price: number;
   cost: number;
   stockQuantity: number;
-  minStockThreshold: number;
+  reorderLevel: number;
   sku: string;
   description: string;
 }
@@ -20,6 +20,7 @@ export interface CreateProductRequest {
   price: number;
   cost: number;
   stockQuantity: number;
+  reorderLevel?: number;
   categoryId?: number;
 }
 

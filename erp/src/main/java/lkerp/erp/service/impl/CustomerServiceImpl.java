@@ -23,6 +23,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO.Response createCustomer(CustomerDTO.Request request) {
+        if (request.getId() != null) {
+            return updateCustomer(request.getId(), request);
+        }
+        
         Business business = businessRepository.findById(request.getBusinessId())
                 .orElseThrow(() -> new ResourceNotFoundException("Business not found with id: " + request.getBusinessId()));
 

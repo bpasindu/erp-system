@@ -132,7 +132,7 @@ const ProductsPage = () => {
 
       const matchesLowStock =
         !lowStockOnly ||
-        Number(p.stockQty ?? 0) <= Number(p.reorderLevel ?? 0);
+        Number(p.stockQty ?? 0) < 5;
 
       return matchesSearch && matchesCategory && matchesLowStock;
     });
@@ -205,7 +205,7 @@ const ProductsPage = () => {
     if (qty === 0) {
       return { label: 'Out', className: 'badge-out' };
     }
-    if (qty <= reorder && qty > 0) {
+    if (qty > 0 && qty < 5) {
       return { label: 'Low', className: 'badge-low' };
     }
     return null;

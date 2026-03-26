@@ -116,22 +116,26 @@ const CustomersPage = () => {
     setModalError('');
 
     const basePayload = {
+      id: editingItem?.id, // Include ID for updates
       businessId,
       name: form.name,
       email: form.email || undefined,
       phone: form.phone || undefined,
       address: form.address || undefined,
+      notes: form.notes || undefined,
     };
 
     const isCustomersTab = activeTab === 'customers';
 
-    const url = isCustomersTab
-      ? `${API_BASE}/api/customers`
-      : `${API_BASE}/api/suppliers`;
+    const url = editingItem
+      ? (isCustomersTab ? `${API_BASE}/api/customers/${editingItem.id}` : `${API_BASE}/api/suppliers/${editingItem.id}`)
+      : (isCustomersTab ? `${API_BASE}/api/customers` : `${API_BASE}/api/suppliers`);
+    
+    const method = editingItem ? 'PUT' : 'POST';
 
     try {
       const res = await fetch(url, {
-        method: 'POST',
+        method: method,
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

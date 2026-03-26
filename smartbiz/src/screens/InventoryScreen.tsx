@@ -34,7 +34,7 @@ const SPACING = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 };
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
 const ProductItem = ({ product }: { product: ProductService.Product }) => {
-  const isLowStock = product.stockQuantity <= (product.minStockThreshold || 0);
+  const isLowStock = product.stockQuantity > 0 && product.stockQuantity < 5;
   return (
     <View style={styles.productCard}>
       <View style={styles.productIconContainer}>

@@ -38,6 +38,9 @@ public class Product {
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
 
+    @Column(name = "reorder_level")
+    private Integer reorderLevel;
+
     @Column(name = "created_at")
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -14,6 +14,7 @@ import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO.Response createProduct(ProductDTO.Request request) {
+        if (request.getId() != null) {
+            return updateProduct(request.getId(), request);
+        }
+
+        // Note: Field mapping for price/sellingPrice and cost/buyingPrice
+        BigDecimal finalPrice = request.getSellingPrice() != null ? request.getSellingPrice() : request.getPrice();
+        BigDecimal finalCost = request.getBuyingPrice() != null ? request.getBuyingPrice() : request.getCost();
+
         Business business = businessRepository.findById(request.getBusinessId())
                 .orElseThrow(() -> new ResourceNotFoundException("Business not found with id: " + request.getBusinessId()));
 
@@ -53,9 +62,10 @@ public class ProductServiceImpl implements ProductService {
                 .name(request.getName())
                 .sku(request.getSku())
                 .description(request.getDescription())
-                .price(request.getPrice())
-                .cost(request.getCost())
+                .price(finalPrice)
+                .cost(finalCost)
                 .stockQuantity(initialStock)
+                .reorderLevel(request.getReorderLevel())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -105,13 +115,17 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + request.getSupplierId()));
         }
 
+        BigDecimal finalPrice = request.getSellingPrice() != null ? request.getSellingPrice() : request.getPrice();
+        BigDecimal finalCost = request.getBuyingPrice() != null ? request.getBuyingPrice() : request.getCost();
+
         product.setCategory(category);
         product.setSupplier(supplier);
         product.setName(request.getName());
         product.setSku(request.getSku());
         product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setCost(request.getCost());
+        product.setPrice(finalPrice);
+        product.setCost(finalCost);
+        product.setReorderLevel(request.getReorderLevel());
         if (request.getStockQuantity() != null) {
             product.setStockQuantity(request.getStockQuantity());
         }
@@ -146,7 +160,10 @@ public class ProductServiceImpl implements ProductService {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .cost(product.getCost())
-                .stockQuantity(product.getStockQuantity())  
+                .sellingPrice(product.getPrice())
+                .buyingPrice(product.getCost())
+                .stockQuantity(product.getStockQuantity())
+                .reorderLevel(product.getReorderLevel())
                 .createdAt(product.getCreatedAt())
                 .build();
     }

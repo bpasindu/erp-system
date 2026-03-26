@@ -235,9 +235,8 @@ const Page2 = () => {
     let out = 0;
     products.forEach((p) => {
       const qty = Number(p.stockQuantity ?? p.stockQty ?? 0);
-      const reorder = Number(p.reorderLevel ?? 0);
       if (qty <= 0) out += 1;
-      else if (qty > 0 && qty <= reorder) low += 1;
+      else if (qty < 5) low += 1;
     });
     return { low, out, total: products.length };
   }, [products]);
@@ -259,8 +258,7 @@ const Page2 = () => {
     return products
       .filter((p) => {
         const qty = Number(p.stockQuantity ?? p.stockQty ?? 0);
-        const reorder = Number(p.reorderLevel ?? 0);
-        return qty > 0 && qty <= reorder;
+        return qty > 0 && qty < 5;
       })
       .slice(0, 5)
       .map((p) => ({

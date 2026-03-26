@@ -11,17 +11,24 @@ export interface DashboardData {
     labels: string[];
     datasets: { data: number[] }[];
   };
+  lowStockProducts: any[];
 }
 
 export const getDashboardData = async (businessId: number): Promise<DashboardData> => {
   try {
-    const [invRes, prodRes] = await Promise.all([
+    const [invRes, prodRes, custRes] = await Promise.all([
       api.get(`/invoices/business/${businessId}`),
       api.get(`/products/business/${businessId}`),
+      api.get(`/customers/business/${businessId}`),
     ]);
 
     const invoices = invRes.data.data || [];
     const products = prodRes.data.data || [];
+    const customers = custRes.data.data || [];
+
+    // Customer Name Mapping
+    const customerMap = new Map();
+    customers.forEach((c: any) => customerMap.set(c.id, c.name));
 
     // Today's Sales Calculation
     const today = new Date().toISOString().slice(0, 10);
@@ -41,10 +48,9 @@ export const getDashboardData = async (businessId: number): Promise<DashboardDat
     let lowStock = 0;
     let outOfStock = 0;
     products.forEach((p: any) => {
-      const qty = p.stockQty || 0;
-      const reorder = p.reorderLevel || 0;
-      if (qty === 0) outOfStock++;
-      else if (qty <= reorder) lowStock++;
+      const qty = Number(p.stockQuantity ?? p.stockQty ?? 0);
+      if (qty <= 0) outOfStock++;
+      else if (qty < 5) lowStock++;
     });
 
     // Recent Invoices (last 5)
@@ -55,18 +61,49 @@ export const getDashboardData = async (businessId: number): Promise<DashboardDat
         id: inv.invoiceNumber || `INV-${inv.id}`,
         amount: inv.totalAmount || 0,
         status: (inv.status || 'unpaid').toLowerCase(),
-        customer: 'Customer', // Would need Customer mapping for better UI
+        customer: customerMap.get(inv.customerId) || 'Unknown Customer',
       }));
 
-    // Mock Sales Chart Data (Last 7 Days)
+    // Real Sales Chart Data (Last 7 Days)
+    const days: { label: string; dateStr: string; total: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const dateStr = d.toISOString().slice(0, 10);
+      days.push({ label: dayName, dateStr, total: 0 });
+    }
+
+    invoices.forEach((inv: any) => {
+      const date = inv.createdAt ? String(inv.createdAt).slice(0, 10) : '';
+      const dayObj = days.find(d => d.dateStr === date);
+      if (dayObj) {
+        dayObj.total += Number(inv.totalAmount || 0);
+      }
+    });
+
     const salesChartData = {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels: days.map(d => d.label),
       datasets: [
         {
-          data: [20, 45, 28, 80, 99, 43, 50], // Placeholder data
+          data: days.map(d => d.total),
         },
       ],
     };
+
+    // Low Stock Products (top 5)
+    const lowStockProducts = products
+      .filter((p: any) => {
+        const qty = Number(p.stockQuantity ?? p.stockQty ?? 0);
+        return qty > 0 && qty < 5;
+      })
+      .slice(0, 5)
+      .map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
+        qty: Number(p.stockQuantity ?? p.stockQty ?? 0),
+      }));
 
     return {
       totalProducts: products.length,
@@ -76,6 +113,7 @@ export const getDashboardData = async (businessId: number): Promise<DashboardDat
       outOfStockItems: outOfStock,
       recentInvoices,
       salesChartData,
+      lowStockProducts,
     };
   } catch (error) {
     console.error('Error fetching dashboard data:', error);

@@ -40,8 +40,8 @@ const { width } = Dimensions.get('window');
 const KPICard = ({ title, value, color, icon }: any) => (
   <View style={styles.kpiCard}>
     <View style={[styles.kpiIcon, { backgroundColor: color + '20' }]}>
-       {/* Icon placeholder - would use vector icons here */}
-       <Text style={{ color: color, fontSize: 12 }}>{icon}</Text>
+      {/* Icon placeholder - would use vector icons here */}
+      <Text style={{ color: color, fontSize: 12 }}>{icon}</Text>
     </View>
     <Text style={styles.kpiTitle}>{title}</Text>
     <Text style={styles.kpiValue}>{value}</Text>
@@ -51,7 +51,7 @@ const KPICard = ({ title, value, color, icon }: any) => (
 const ActionButton = ({ title, icon, color, onPress }: any) => (
   <TouchableOpacity style={styles.actionButton} onPress={onPress}>
     <View style={[styles.actionIcon, { backgroundColor: color + '20' }]}>
-       <Text style={{ color: color, fontSize: 18 }}>{icon}</Text>
+      <Text style={{ color: color, fontSize: 18 }}>{icon}</Text>
     </View>
     <Text style={styles.actionTitle}>{title}</Text>
   </TouchableOpacity>
@@ -118,28 +118,28 @@ const DashboardScreen = ({ navigation }: any) => {
         </View>
 
         <View style={styles.kpiGrid}>
-          <KPICard 
-            title="Total Products" 
-            value={data?.totalProducts || 0} 
-            color="#3b82f6" 
+          <KPICard
+            title="Total Products"
+            value={data?.totalProducts || 0}
+            color="#3b82f6"
             icon="📦"
           />
-          <KPICard 
-            title="Today's Sales" 
-            value={`Rs.${(data?.todaySales || 0).toLocaleString()}`} 
-            color="#10b981" 
+          <KPICard
+            title="Today's Sales"
+            value={`Rs.${(data?.todaySales || 0).toLocaleString()}`}
+            color="#10b981"
             icon="🛒"
           />
-          <KPICard 
-            title="Total Revenue" 
-            value={`Rs.${(data?.monthSales || 0).toLocaleString()}`} 
-            color="#f59e0b" 
+          <KPICard
+            title="Total Revenue"
+            value={`Rs.${(data?.monthSales || 0).toLocaleString()}`}
+            color="#f59e0b"
             icon="💰"
           />
-          <KPICard 
-            title="Low Stock" 
-            value={data?.lowStockItems || 0} 
-            color="#ef4444" 
+          <KPICard
+            title="Low Stock"
+            value={data?.lowStockItems || 0}
+            color="#ef4444"
             icon="⚠️"
           />
         </View>
@@ -180,27 +180,45 @@ const DashboardScreen = ({ navigation }: any) => {
         <View style={styles.recentInvoicesSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Invoices</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Invoices')}>
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
-          
+
           {(data?.recentInvoices || []).map((inv: any, index: number) => (
             <View key={index} style={styles.invoiceItem}>
-               <View style={styles.invoiceMain}>
-                  <Text style={styles.invoiceId}>{inv.id}</Text>
-                  <Text style={styles.invoiceDate}>Kamal Perera</Text>
-               </View>
-               <View style={styles.invoiceSide}>
-                  <Text style={styles.invoiceAmount}>Rs. {inv.amount.toLocaleString()}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: inv.status === 'paid' ? COLORS.success + '20' : COLORS.error + '20' }]}>
-                    <Text style={[styles.statusText, { color: inv.status === 'paid' ? COLORS.success : COLORS.error }]}>{inv.status.toUpperCase()}</Text>
-                  </View>
-               </View>
+              <View style={styles.invoiceMain}>
+                <Text style={styles.invoiceId}>{inv.id}</Text>
+                <Text style={styles.invoiceDate}>{inv.customer}</Text>
+              </View>
+              <View style={styles.invoiceSide}>
+                <Text style={styles.invoiceAmount}>Rs. {inv.amount.toLocaleString()}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: inv.status === 'paid' ? COLORS.success + '20' : COLORS.error + '20' }]}>
+                  <Text style={[styles.statusText, { color: inv.status === 'paid' ? COLORS.success : COLORS.error }]}>{inv.status.toUpperCase()}</Text>
+                </View>
+              </View>
             </View>
           ))}
           {(data?.recentInvoices || []).length === 0 && (
-             <Text style={styles.emptyText}>No recent invoices found.</Text>
+            <Text style={styles.emptyText}>No recent invoices found.</Text>
+          )}
+        </View>
+
+        <View style={styles.lowStockSection}>
+          <Text style={styles.sectionTitle}>Low Stock Items</Text>
+          {(data?.lowStockProducts || []).map((prod: any, index: number) => (
+            <View key={index} style={styles.lowStockItem}>
+              <View style={styles.productMain}>
+                <Text style={styles.productName}>{prod.name}</Text>
+                <Text style={styles.productSku}>{prod.sku || 'No SKU'}</Text>
+              </View>
+              <View style={styles.productSide}>
+                <Text style={[styles.productQty, { color: COLORS.error }]}>{prod.qty} left</Text>
+              </View>
+            </View>
+          ))}
+          {(data?.lowStockProducts || []).length === 0 && (
+            <Text style={styles.emptyText}>No low stock items found.</Text>
           )}
         </View>
       </ScrollView>
@@ -403,6 +421,43 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     fontStyle: 'italic',
     marginTop: SPACING.md,
+  },
+  lowStockSection: {
+    marginVertical: SPACING.md,
+  },
+  lowStockItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.surface,
+    padding: SPACING.md,
+    borderRadius: 16,
+    marginBottom: SPACING.sm,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  productMain: {
+    justifyContent: 'center',
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  productSku: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginTop: 2,
+  },
+  productSide: {
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  productQty: {
+    fontSize: 16,
+    fontWeight: '800',
   },
 });
 

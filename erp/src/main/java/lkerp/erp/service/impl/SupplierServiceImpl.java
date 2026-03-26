@@ -23,6 +23,10 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public SupplierDTO.Response createSupplier(SupplierDTO.Request request) {
+        if (request.getId() != null) {
+            return updateSupplier(request.getId(), request);
+        }
+
         Business business = businessRepository.findById(request.getBusinessId())
                 .orElseThrow(() -> new ResourceNotFoundException("Business not found with id: " + request.getBusinessId()));
 
