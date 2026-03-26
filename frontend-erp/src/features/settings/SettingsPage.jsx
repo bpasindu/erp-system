@@ -3,8 +3,12 @@ import '../products/ProductsPage.css';
 import './SettingsPage.css';
 
 const SettingsPage = () => {
-  const [businessName, setBusinessName] = useState('SmartBiz');
-  const [darkMode, setDarkMode] = useState(false);
+  const [businessName, setBusinessName] = useState(
+    localStorage.getItem('businessName') || 'SmartBiz'
+  );
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem('theme') === 'dark'
+  );
 
   // Password state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -16,9 +20,8 @@ const SettingsPage = () => {
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
-    // Placeholder for future backend integration
-    // eslint-disable-next-line no-console
-    console.log('Profile saved', { businessName });
+    localStorage.setItem('businessName', businessName);
+    window.dispatchEvent(new Event('businessNameChange'));
   };
 
   const handleResetMockData = () => {
@@ -158,7 +161,17 @@ const SettingsPage = () => {
             <input
               type="checkbox"
               checked={darkMode}
-              onChange={(e) => setDarkMode(e.target.checked)}
+              onChange={(e) => {
+                const isDark = e.target.checked;
+                setDarkMode(isDark);
+                if (isDark) {
+                  document.documentElement.setAttribute('data-theme', 'dark');
+                  localStorage.setItem('theme', 'dark');
+                } else {
+                  document.documentElement.removeAttribute('data-theme');
+                  localStorage.setItem('theme', 'light');
+                }
+              }}
             />
             <span className="slider" />
           </label>
