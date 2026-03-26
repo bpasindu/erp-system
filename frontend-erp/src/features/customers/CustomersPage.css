@@ -12,7 +12,7 @@
 
 .customers-tabs {
   display: inline-flex;
-  background: #e5e7eb;
+  background: var(--border-color);
   padding: 0.15rem;
   border-radius: 999px;
 }
@@ -24,13 +24,13 @@
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #4b5563;
+  color: var(--text-muted);
   cursor: default;
 }
 
 .tab-button.active {
-  background: #ffffff;
-  color: #111827;
+  background: var(--card-bg);
+  color: var(--text-color);
   cursor: default;
 }
 
@@ -49,9 +49,9 @@
 }
 
 .customer-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
@@ -63,13 +63,13 @@
   margin: 0 0 0.25rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .customer-main p {
   margin: 0.1rem 0;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--text-muted);
 }
 
 .customer-email {
@@ -77,7 +77,7 @@
 }
 
 .customer-address {
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .customer-actions {

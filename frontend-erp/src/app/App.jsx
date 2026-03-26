@@ -19,8 +19,17 @@ import AIUsage from '../super_admin/pages/AIUsage';
 import Statistics from '../super_admin/pages/Statistics';
 import PlansBilling from '../super_admin/pages/PlansBilling';
 import AdminSettings from '../super_admin/pages/AdminSettings';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, []);
   return (
     <>
       <Routes>

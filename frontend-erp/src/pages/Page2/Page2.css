@@ -6,9 +6,9 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: #f8f9fc;
+  background-color: var(--bg-color);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #111827;
+  color: var(--text-color);
   position: absolute;
   top: 0;
   left: 0;
@@ -20,8 +20,8 @@
 /* Sidebar Styles */
 .sidebar {
   width: 250px;
-  background-color: #ffffff;
-  border-right: 1px solid #e5e7eb;
+  background-color: var(--card-bg);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -33,11 +33,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .brand-name {
-  color: #2563eb;
+  color: var(--primary);
   font-size: 1.5rem;
   font-weight: 800;
   margin: 0;
@@ -50,7 +50,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #4b5563;
+  color: var(--text-color);
 }
 
 .sidebar-nav {
@@ -63,7 +63,7 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1.5rem;
-  color: #4b5563;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
@@ -73,12 +73,12 @@
 }
 
 .nav-item:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: var(--border-color);
+  color: var(--text-color);
 }
 
 .nav-item.active {
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: #ffffff;
 }
 
@@ -95,7 +95,7 @@
 
 .sidebar-footer {
   padding: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 .logout {
@@ -119,8 +119,8 @@
 /* Top Header */
 .top-header {
   height: 70px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -131,7 +131,8 @@
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: #f3f4f6;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   padding: 0.5rem 1rem;
   width: 400px;
@@ -139,7 +140,7 @@
 }
 
 .search-icon {
-  color: #9ca3af;
+  color: var(--text-muted);
   margin-right: 0.5rem;
   font-size: 0.9rem;
 }
@@ -150,7 +151,7 @@
   width: 100%;
   font-size: 0.95rem;
   outline: none;
-  color: #1f2937;
+  color: var(--input-text);
 }
 
 .header-actions {
@@ -163,7 +164,7 @@
   background: none;
   border: none;
   font-size: 1.25rem;
-  color: #4b5563;
+  color: var(--text-muted);
   cursor: pointer;
   position: relative;
   padding: 0.25rem;
@@ -177,14 +178,14 @@
   height: 8px;
   background-color: #dc2626;
   border-radius: 50%;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--card-bg);
 }
 
 .profile-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: white;
   display: flex;
   align-items: center;
@@ -212,7 +213,7 @@
   margin: 0;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .page-actions {
@@ -234,22 +235,22 @@
 }
 
 .btn-primary {
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #1d4ed8;
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {
-  background-color: #ffffff;
-  color: #374151;
-  border-color: #d1d5db;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--input-border);
 }
 
 .btn-secondary:hover {
-  background-color: #f9fafb;
+  background-color: var(--border-color);
 }
 
 /* KPI Cards */
@@ -261,10 +262,10 @@
 }
 
 .dashboard-card {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.25rem;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--border-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -278,12 +279,12 @@
 }
 
 .card-icon {
-  color: #2563eb;
+  color: var(--primary);
   font-size: 1.1rem;
 }
 
 .card-title {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -297,7 +298,7 @@
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-color);
 }
 
 /* Main Content Grid */
@@ -308,10 +309,10 @@
 }
 
 .layout-card {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--border-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -319,7 +320,7 @@
   margin: 0 0 1.25rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .mt-4 {
@@ -337,8 +338,8 @@
   justify-content: space-around;
   height: 300px;
   padding: 1rem 0;
-  border-left: 1px dashed #e5e7eb;
-  border-bottom: 1px dashed #e5e7eb;
+  border-left: 1px dashed var(--border-color);
+  border-bottom: 1px dashed var(--border-color);
   position: relative;
   margin-top: 1rem;
 }
@@ -350,7 +351,7 @@
   top: 0;
   left: 0;
   right: 0;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--border-color);
 }
 
 .chart-placeholder::after {
@@ -359,7 +360,7 @@
   top: 50%;
   left: 0;
   right: 0;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--border-color);
 }
 
 .bar-wrapper {
@@ -376,20 +377,20 @@
 
 .bar {
   width: 100%;
-  background-color: #2563eb;
+  background-color: var(--primary);
   border-radius: 4px 4px 0 0;
   transition: height 0.3s ease;
 }
 
 .bar:hover {
-  background-color: #1d4ed8;
+  background-color: var(--primary-hover);
 }
 
 .x-label {
   position: absolute;
   bottom: 0;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 /* Orders Table */
@@ -403,7 +404,7 @@
 .btn-link {
   background: none;
   border: none;
-  color: #111827;
+  color: var(--text-color);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -421,7 +422,7 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .order-item:last-child {
@@ -442,24 +443,24 @@
 
 .order-id {
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
   font-size: 0.95rem;
 }
 
 .order-separator {
   margin: 0 0.5rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .order-customer {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-color);
   font-size: 0.95rem;
 }
 
 .order-date {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 0.1rem;
 }
 
@@ -472,7 +473,7 @@
 
 .order-amount {
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .status-badge {
@@ -484,7 +485,7 @@
 }
 
 .status-badge.paid {
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -508,7 +509,7 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .low-stock-item:last-child {
@@ -523,13 +524,13 @@
 
 .product-name {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-color);
   font-size: 0.95rem;
 }
 
 .product-sku {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .product-qty {
