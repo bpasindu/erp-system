@@ -1,8 +1,226 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Statistics.css';
+
+const API_BASE = 'http://localhost:8080';
 
 const Statistics = () => {
   const [activeTab, setActiveTab] = useState('Growth');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE}/api/admin/statistics`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const json = await res.json();
+        if (json.success) setData(json.data);
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [token]);
+
+  if (loading) return <div className="sa-loading-container"><div className="sa-loader"></div><p>Loading System Intelligence...</p></div>;
+  if (!data) return <div className="sa-error">Connection to analytics engine lost.</div>;
+
+  const renderGridLines = (steps = 4) => (
+    <div className="sa-chart-grid-lines">
+      {[...Array(steps + 1)].map((_, i) => (
+        <div key={i} className="sa-grid-line" style={{ bottom: `${(i / steps) * 100}%` }}></div>
+      ))}
+    </div>
+  );
+
+  const generateLinePath = (points, width, height, maxVal, closePath = false) => {
+    if (!points || points.length === 0) return "";
+    const stepX = width / (points.length - 1);
+    const coords = points.map((p, i) => {
+      const x = i * stepX;
+      const y = height - (Math.min(p.value, maxVal) / maxVal) * height;
+      return { x, y };
+    });
+
+    let path = `M${coords[0].x},${coords[0].y}`;
+    for (let i = 0; i < coords.length - 1; i++) {
+        // Curve implementation
+        const cp1x = coords[i].x + (coords[i+1].x - coords[i].x) / 2;
+        path += ` C${cp1x},${coords[i].y} ${cp1x},${coords[i + 1].y} ${coords[i + 1].x},${coords[i + 1].y}`;
+    }
+
+    if (closePath) {
+        path += ` L${width},${height} L0,${height} Z`;
+    }
+    return path;
+  };
+
+  const renderGrowth = () => (
+    <>
+      <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">New Signups</h3>
+        <div className="sa-chart-container">
+            <div className="sa-y-axis">
+                <span>8</span><span>6</span><span>4</span><span>2</span><span>0</span>
+            </div>
+            <div className="sa-chart-content">
+                {renderGridLines(4)}
+                <div className="sa-bar-chart">
+                    {data.growth.newSignups.map((p, i) => (
+                    <div key={i} className="sa-bar signup-bar" style={{height: `${Math.min(100, (p.value / 8) * 100)}%`}} title={`${p.label}: ${p.value}`}></div>
+                    ))}
+                </div>
+            </div>
+        </div>
+        <div className="sa-x-axis">
+            {data.growth.newSignups.filter((_, i) => i % 6 === 0).map((p, i) => <span key={i}>{p.label}</span>)}
+        </div>
+      </div>
+
+      <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">Churn Rate (Mock)</h3>
+        <div className="sa-chart-container">
+            <div className="sa-y-axis">
+                <span>2</span><span>1.5</span><span>1</span><span>0.5</span><span>0</span>
+            </div>
+            <div className="sa-chart-content">
+                {renderGridLines(4)}
+                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
+                    <path d={generateLinePath(data.growth.churnRate, 500, 200, 2)} 
+                        fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinejoin="round" />
+                </svg>
+            </div>
+        </div>
+        <div className="sa-x-axis">
+            {data.growth.churnRate.filter((_, i) => i % 6 === 0).map((p, i) => <span key={i}>{p.label}</span>)}
+        </div>
+      </div>
+    </>
+  );
+
+  const renderRevenue = () => (
+    <>
+      <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">MRR Trend</h3>
+        <div className="sa-chart-container">
+            <div className="sa-y-axis">
+                <span>600K</span><span>450K</span><span>300K</span><span>150K</span><span>0K</span>
+            </div>
+            <div className="sa-chart-content">
+                {renderGridLines(4)}
+                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
+                    <path d={generateLinePath(data.revenue.mrrTrend, 500, 200, 600000, true)} 
+                        fill="rgba(34, 197, 94, 0.15)" />
+                    <path d={generateLinePath(data.revenue.mrrTrend, 500, 200, 600000)} 
+                        fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinejoin="round" />
+                </svg>
+            </div>
+        </div>
+        <div className="sa-x-axis">
+            {data.revenue.mrrTrend.map((p, i) => <span key={i}>{p.label}</span>)}
+        </div>
+      </div>
+
+      <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">Plan Distribution</h3>
+        <div className="sa-pie-chart-container">
+            <svg viewBox="0 0 100 100" className="sa-pie-svg">
+                {/* Simplified Pie Chart Segments */}
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#22c55e" strokeWidth="20" strokeDasharray="60 251.2" strokeDashoffset="0" />
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#3b82f6" strokeWidth="20" strokeDasharray="50 251.2" strokeDashoffset="-60" />
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#a855f7" strokeWidth="20" strokeDasharray="80 251.2" strokeDashoffset="-110" />
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#f59e0b" strokeWidth="20" strokeDasharray="61.2 251.2" strokeDashoffset="-190" />
+            </svg>
+            <div className="sa-pie-labels">
+                <span className="sa-pie-label green">Starter: 8</span>
+                <span className="sa-pie-label blue">Free: 4</span>
+                <span className="sa-pie-label orange">Pro: 6</span>
+                <span className="sa-pie-label purple">Enterprise: 7</span>
+            </div>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderEngagement = () => (
+    <div className="sa-stats-card sa-stats-full">
+      <h3 className="sa-stats-card-title">DAU / MAU</h3>
+      <div className="sa-chart-container">
+            <div className="sa-y-axis">
+                <span>36</span><span>27</span><span>18</span><span>9</span><span>0</span>
+            </div>
+            <div className="sa-chart-content">
+                {renderGridLines(4)}
+                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
+                    {/* MAU - Purple */}
+                    <path d={generateLinePath(data.engagement.mau, 500, 200, 36, true)} 
+                        fill="rgba(168, 85, 247, 0.15)" />
+                    <path d={generateLinePath(data.engagement.mau, 500, 200, 36)} 
+                        fill="none" stroke="#a855f7" strokeWidth="2.5" />
+                    
+                    {/* DAU - Blue */}
+                    <path d={generateLinePath(data.engagement.dau, 500, 200, 36, true)} 
+                        fill="rgba(59, 130, 246, 0.15)" />
+                    <path d={generateLinePath(data.engagement.dau, 500, 200, 36)} 
+                        fill="none" stroke="#3b82f6" strokeWidth="2.5" />
+                </svg>
+            </div>
+      </div>
+      <div className="sa-x-axis">
+          {data.engagement.dau.filter((_, i) => i % 6 === 0).map((p, i) => <span key={i}>{p.label}</span>)}
+      </div>
+    </div>
+  );
+
+  const renderAIStats = () => (
+    <>
+      <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">AI Requests by Feature</h3>
+        <div className="sa-chart-container">
+            <div className="sa-y-axis">
+                <span>60</span><span>45</span><span>30</span><span>15</span><span>0</span>
+            </div>
+            <div className="sa-chart-content">
+                {renderGridLines(4)}
+                <div className="sa-bar-chart">
+                    {Object.entries(data.aiAnalytics.requestsByFeature).map(([name, val], i) => (
+                    <div key={i} className="sa-bar ai-bar" style={{height: `${Math.min(100, (val / 60) * 100)}%`}} title={`${name}: ${val}`}></div>
+                    ))}
+                </div>
+            </div>
+        </div>
+        <div className="sa-x-axis ai-x">
+            {Object.keys(data.aiAnalytics.requestsByFeature).map((name, i) => <span key={i}>{name}</span>)}
+        </div>
+      </div>
+
+      <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">Daily AI Requests</h3>
+        <div className="sa-chart-container">
+            <div className="sa-y-axis">
+                <span>260</span><span>195</span><span>130</span><span>65</span><span>0</span>
+            </div>
+            <div className="sa-chart-content">
+                {renderGridLines(4)}
+                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
+                    <path d={generateLinePath(data.aiAnalytics.dailyRequests, 500, 200, 260, true)} 
+                        fill="rgba(168, 85, 247, 0.15)" />
+                    <path d={generateLinePath(data.aiAnalytics.dailyRequests, 500, 200, 260)} 
+                        fill="none" stroke="#a855f7" strokeWidth="2.5" strokeLinejoin="round" />
+                </svg>
+            </div>
+        </div>
+        <div className="sa-x-axis">
+            {data.aiAnalytics.dailyRequests.filter((_, i) => i % 6 === 0).map((p, i) => <span key={i}>{p.label}</span>)}
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div className="sa-statistics">
@@ -22,44 +240,10 @@ const Statistics = () => {
       </div>
 
       <div className="sa-stats-grid">
-        <div className="sa-stats-card sa-stats-wide">
-          <h3 className="sa-stats-card-title">New Signups</h3>
-          <div className="sa-stats-chart-large">
-            <div className="sa-mock-bar-chart">
-              {/* Specifically matched visual mock to user's screenshot */}
-              {[4, 3, 1, 1, 4, 1, 6, 6, 1, 1, 2, 5, 4, 4, 3, 4, 6, 3, 3, 4, 6, 2, 2, 5, 3, 3, 4].map((val, i) => (
-                <div key={i} className="sa-bar" style={{height: `${val * 15}%`}}></div>
-              ))}
-            </div>
-            <div className="sa-chart-labels">
-              <span>Jan 16</span>
-              <span>Jan 22</span>
-              <span>Jan 28</span>
-              <span>Feb 3</span>
-              <span>Feb 9</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="sa-stats-card sa-stats-wide">
-          <h3 className="sa-stats-card-title">Churn Rate (Mock)</h3>
-          <div className="sa-stats-chart-large">
-             <div className="sa-mock-line-chart">
-                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
-                   {/* Simulating the red aggressive squiggly line from screenshot */}
-                   <path d="M0,100 L20,100 L30,200 L40,200 L50,0 L60,100 L70,200 L80,200 L90,100 L110,100 L120,200 L130,10 L150,200 L160,100 L180,100 L190,200 L200,10 L220,10 L230,200 L250,10 L270,10 L280,100 L290,200 L310,200 M310,200 L500,200" 
-                         fill="none" stroke="#ef4444" strokeWidth="2" strokeLinejoin="round" />
-                </svg>
-             </div>
-             <div className="sa-chart-labels">
-              <span>Jan 16</span>
-              <span>Jan 22</span>
-              <span>Jan 28</span>
-              <span>Feb 3</span>
-              <span>Feb 9</span>
-            </div>
-          </div>
-        </div>
+        {activeTab === 'Growth' && renderGrowth()}
+        {activeTab === 'Revenue' && renderRevenue()}
+        {activeTab === 'Engagement' && renderEngagement()}
+        {activeTab === 'AI Analytics' && renderAIStats()}
       </div>
     </div>
   );
