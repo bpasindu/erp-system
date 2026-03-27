@@ -1,11 +1,15 @@
 package lkerp.erp.service.impl;
 
 import lkerp.erp.dto.StatisticsDTO;
+import lkerp.erp.dto.DashboardDTO;
+import lkerp.erp.dto.UsageLogDTO;
 import lkerp.erp.repository.BusinessRepository;
 import lkerp.erp.repository.BusinessSubscriptionRepository;
 import lkerp.erp.repository.UsageLogRepository;
 import lkerp.erp.repository.AIRequestRepository;
+import lkerp.erp.repository.PaymentRepository;
 import lkerp.erp.service.StatisticsService;
+import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,41 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final BusinessSubscriptionRepository businessSubscriptionRepository;
     private final UsageLogRepository usageLogRepository;
     private final AIRequestRepository aiRequestRepository;
+    private final PaymentRepository paymentRepository;
+    private final UsageLogService usageLogService;
+
+    @Override
+    public DashboardDTO getDashboardSummary() {
+        LocalDateTime lastMonth = LocalDateTime.now().minusDays(30);
+        
+        // KPIs
+        long totalBusinesses = businessRepository.count();
+        long activeSubs = businessSubscriptionRepository.countByStatus("ACTIVE");
+        long totalAi = aiRequestRepository.count();
+        
+        double monthlyRevenue = paymentRepository.findByStatusAndPaymentDateAfter("SUCCESS", lastMonth).stream()
+                .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
+                .sum();
+
+        // Trends (Reusing existing methods logic)
+        StatisticsDTO.GrowthStats growth = getGrowthStats();
+        StatisticsDTO.RevenueStats revenue = getRevenueStats();
+        
+        // Recent Activities
+        List<UsageLogDTO.Response> activities = usageLogService.getLogs(null, null, null).stream()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        return DashboardDTO.builder()
+                .totalBusinesses(totalBusinesses)
+                .activeSubscriptions(activeSubs)
+                .monthlyRevenue(monthlyRevenue)
+                .totalAiRequests(totalAi)
+                .signupTrend(growth.getNewSignups())
+                .revenueTrend(revenue.getMrrTrend())
+                .recentActivities(activities)
+                .build();
+    }
 
     @Override
     public StatisticsDTO getSystemStatistics() {

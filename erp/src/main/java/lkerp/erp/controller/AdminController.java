@@ -3,6 +3,7 @@ package lkerp.erp.controller;
 import lkerp.erp.dto.ApiResponse;
 import lkerp.erp.dto.UsageLogDTO;
 import lkerp.erp.dto.StatisticsDTO;
+import lkerp.erp.dto.DashboardDTO;
 import lkerp.erp.service.UsageLogService;
 import lkerp.erp.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,11 @@ public class AdminController {
     @GetMapping("/statistics")
     public ResponseEntity<ApiResponse<StatisticsDTO>> getStatistics() {
         return ResponseEntity.ok(ApiResponse.success("System statistics retrieved", statisticsService.getSystemStatistics()));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<DashboardDTO>> getDashboard() {
+        return ResponseEntity.ok(ApiResponse.success("Dashboard summary retrieved", statisticsService.getDashboardSummary()));
     }
 
     @GetMapping("/usage-logs")
