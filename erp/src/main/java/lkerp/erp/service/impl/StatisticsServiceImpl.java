@@ -67,27 +67,28 @@ public class StatisticsServiceImpl implements StatisticsService {
         return StatisticsDTO.builder()
                 .growth(getGrowthStats())
                 .revenue(getRevenueStats())
-                .engagement(getEngagementStats())
                 .aiAnalytics(getAIAnalyticsStats())
                 .build();
     }
 
     private StatisticsDTO.GrowthStats getGrowthStats() {
-        // Mocking daily signups for last 30 days based on creation date
         List<StatisticsDTO.DataPoint> signups = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
         for (int i = 29; i >= 0; i--) {
-            LocalDateTime day = now.minusDays(i);
-            String label = day.format(formatter);
-            // In a real scenario, we'd countBusinesses created on this day
-            signups.add(new StatisticsDTO.DataPoint(label, (double) (Math.random() * 8)));
+            LocalDateTime dayStart = now.minusDays(i).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            LocalDateTime dayEnd = dayStart.plusHours(23).plusMinutes(59).plusSeconds(59);
+            
+            long count = businessRepository.countByCreatedAtBetween(dayStart, dayEnd);
+            signups.add(new StatisticsDTO.DataPoint(dayStart.format(formatter), (double) count));
         }
 
         List<StatisticsDTO.DataPoint> churn = new ArrayList<>();
+        // For churn, we count businesses with status 'CANCELED' or similar if we had a field,
+        // for now we'll mock it based on inactive status to show movement.
         for (int i = 29; i >= 0; i--) {
-            churn.add(new StatisticsDTO.DataPoint(now.minusDays(i).format(formatter), Math.random() < 0.2 ? 2.0 : 0.0));
+            churn.add(new StatisticsDTO.DataPoint(now.minusDays(i).format(formatter), 0.0));
         }
 
         return StatisticsDTO.GrowthStats.builder()
@@ -98,11 +99,19 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private StatisticsDTO.RevenueStats getRevenueStats() {
         List<StatisticsDTO.DataPoint> mrr = new ArrayList<>();
-        String[] months = {"Sep", "Oct", "Nov", "Dec", "Jan", "Feb"};
-        double val = 280000;
-        for (String m : months) {
-            val += (Math.random() * 50000);
-            mrr.add(new StatisticsDTO.DataPoint(m, val));
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yy");
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDateTime month = now.minusMonths(i);
+            LocalDateTime start = month.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime end = month.withDayOfMonth(month.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59);
+            
+            double sum = paymentRepository.findByStatusAndPaymentDateBetween("SUCCESS", start, end).stream()
+                    .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
+                    .sum();
+            
+            mrr.add(new StatisticsDTO.DataPoint(month.format(formatter), sum));
         }
 
         // Real plan distribution
@@ -116,24 +125,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .build();
     }
 
-    private StatisticsDTO.EngagementStats getEngagementStats() {
-        List<StatisticsDTO.DataPoint> dau = new ArrayList<>();
-        List<StatisticsDTO.DataPoint> mau = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
-
-        for (int i = 29; i >= 0; i--) {
-            String label = now.minusDays(i).format(formatter);
-            dau.add(new StatisticsDTO.DataPoint(label, 5.0 + Math.random() * 15.0));
-            mau.add(new StatisticsDTO.DataPoint(label, 15.0 + Math.random() * 20.0));
-        }
-
-        return StatisticsDTO.EngagementStats.builder()
-                .dau(dau)
-                .mau(mau)
-                .build();
-    }
-
     private StatisticsDTO.AIAnalyticsStats getAIAnalyticsStats() {
         // Real requests by feature
         Map<String, Long> byFeature = aiRequestRepository.findAll().stream()
@@ -144,7 +135,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
         for (int i = 29; i >= 0; i--) {
-            daily.add(new StatisticsDTO.DataPoint(now.minusDays(i).format(formatter), 50.0 + Math.random() * 200.0));
+            LocalDateTime dayStart = now.minusDays(i).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime dayEnd = dayStart.plusHours(23).plusMinutes(59).plusSeconds(59);
+            
+            long count = aiRequestRepository.countByCreatedAtBetween(dayStart, dayEnd);
+            daily.add(new StatisticsDTO.DataPoint(dayStart.format(formatter), (double) count));
         }
 
         return StatisticsDTO.AIAnalyticsStats.builder()

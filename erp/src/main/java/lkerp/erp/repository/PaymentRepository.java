@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByStatusAndPaymentDateAfter(String status, LocalDateTime date);
+    List<Payment> findByStatusAndPaymentDateBetween(String status, LocalDateTime start, LocalDateTime end);
 }

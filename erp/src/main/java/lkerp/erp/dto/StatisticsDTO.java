@@ -16,7 +16,6 @@ public class StatisticsDTO {
 
     private GrowthStats growth;
     private RevenueStats revenue;
-    private EngagementStats engagement;
     private AIAnalyticsStats aiAnalytics;
 
     @Data
@@ -35,15 +34,6 @@ public class StatisticsDTO {
     public static class RevenueStats {
         private List<DataPoint> mrrTrend;
         private Map<String, Long> planDistribution;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class EngagementStats {
-        private List<DataPoint> dau;
-        private List<DataPoint> mau;
     }
 
     @Data

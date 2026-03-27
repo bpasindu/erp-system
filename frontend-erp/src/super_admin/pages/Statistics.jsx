@@ -83,21 +83,24 @@ const Statistics = () => {
       </div>
 
       <div className="sa-stats-card sa-stats-wide">
-        <h3 className="sa-stats-card-title">Churn Rate (Mock)</h3>
-        <div className="sa-chart-container">
-            <div className="sa-y-axis">
-                <span>2</span><span>1.5</span><span>1</span><span>0.5</span><span>0</span>
-            </div>
-            <div className="sa-chart-content">
-                {renderGridLines(4)}
-                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
-                    <path d={generateLinePath(data.growth.churnRate, 500, 200, 2)} 
-                        fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinejoin="round" />
-                </svg>
-            </div>
-        </div>
-        <div className="sa-x-axis">
-            {data.growth.churnRate.filter((_, i) => i % 6 === 0).map((p, i) => <span key={i}>{p.label}</span>)}
+        <h3 className="sa-stats-card-title">Growth Data Table</h3>
+        <div className="sa-stats-table-wrapper">
+          <table className="sa-stats-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>New Signups</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.growth.newSignups.slice(-10).reverse().map((p, i) => (
+                <tr key={i}>
+                  <td>{p.label}</td>
+                  <td>{p.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </>
@@ -127,10 +130,9 @@ const Statistics = () => {
       </div>
 
       <div className="sa-stats-card sa-stats-wide">
-        <h3 className="sa-stats-card-title">Plan Distribution</h3>
+        <h3 className="sa-stats-card-title">Revenue Distribution</h3>
         <div className="sa-pie-chart-container">
             <svg viewBox="0 0 100 100" className="sa-pie-svg">
-                {/* Simplified Pie Chart Segments */}
                 <circle cx="50" cy="50" r="40" fill="transparent" stroke="#22c55e" strokeWidth="20" strokeDasharray="60 251.2" strokeDashoffset="0" />
                 <circle cx="50" cy="50" r="40" fill="transparent" stroke="#3b82f6" strokeWidth="20" strokeDasharray="50 251.2" strokeDashoffset="-60" />
                 <circle cx="50" cy="50" r="40" fill="transparent" stroke="#a855f7" strokeWidth="20" strokeDasharray="80 251.2" strokeDashoffset="-110" />
@@ -144,37 +146,29 @@ const Statistics = () => {
             </div>
         </div>
       </div>
-    </>
-  );
 
-  const renderEngagement = () => (
-    <div className="sa-stats-card sa-stats-full">
-      <h3 className="sa-stats-card-title">DAU / MAU</h3>
-      <div className="sa-chart-container">
-            <div className="sa-y-axis">
-                <span>36</span><span>27</span><span>18</span><span>9</span><span>0</span>
-            </div>
-            <div className="sa-chart-content">
-                {renderGridLines(4)}
-                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
-                    {/* MAU - Purple */}
-                    <path d={generateLinePath(data.engagement.mau, 500, 200, 36, true)} 
-                        fill="rgba(168, 85, 247, 0.15)" />
-                    <path d={generateLinePath(data.engagement.mau, 500, 200, 36)} 
-                        fill="none" stroke="#a855f7" strokeWidth="2.5" />
-                    
-                    {/* DAU - Blue */}
-                    <path d={generateLinePath(data.engagement.dau, 500, 200, 36, true)} 
-                        fill="rgba(59, 130, 246, 0.15)" />
-                    <path d={generateLinePath(data.engagement.dau, 500, 200, 36)} 
-                        fill="none" stroke="#3b82f6" strokeWidth="2.5" />
-                </svg>
-            </div>
+      <div className="sa-stats-card sa-stats-full">
+        <h3 className="sa-stats-card-title">Monthly MRR Table</h3>
+        <div className="sa-stats-table-wrapper">
+          <table className="sa-stats-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Revenue (LKR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.revenue.mrrTrend.map((p, i) => (
+                <tr key={i}>
+                  <td>{p.label}</td>
+                  <td>{p.value.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="sa-x-axis">
-          {data.engagement.dau.filter((_, i) => i % 6 === 0).map((p, i) => <span key={i}>{p.label}</span>)}
-      </div>
-    </div>
+    </>
   );
 
   const renderAIStats = () => (
@@ -200,6 +194,28 @@ const Statistics = () => {
       </div>
 
       <div className="sa-stats-card sa-stats-wide">
+        <h3 className="sa-stats-card-title">Daily AI Usage Table</h3>
+        <div className="sa-stats-table-wrapper">
+           <table className="sa-stats-table">
+             <thead>
+               <tr>
+                 <th>Feature</th>
+                 <th>Total Requests</th>
+               </tr>
+             </thead>
+             <tbody>
+               {Object.entries(data.aiAnalytics.requestsByFeature).map(([name, val], i) => (
+                 <tr key={i}>
+                   <td>{name}</td>
+                   <td>{val}</td>
+                 </tr>
+               ))}
+             </tbody>
+           </table>
+        </div>
+      </div>
+
+      <div className="sa-stats-card sa-stats-full">
         <h3 className="sa-stats-card-title">Daily AI Requests</h3>
         <div className="sa-chart-container">
             <div className="sa-y-axis">
@@ -227,22 +243,20 @@ const Statistics = () => {
       <div className="sa-page-header sa-stats-header">
         <div>
           <h1 className="sa-page-title">Statistics</h1>
-          <p className="sa-page-subtitle">System-wide analytics</p>
+          <p className="sa-page-subtitle">Real-time system intelligence</p>
         </div>
-        <button className="sa-btn-outline">↓ Export</button>
+        <button className="sa-btn-outline" onClick={() => window.print()}>↓ Export PDF</button>
       </div>
 
       <div className="sa-stats-tabs">
         <button className={`sa-tab ${activeTab === 'Growth' ? 'active' : ''}`} onClick={() => setActiveTab('Growth')}>Growth</button>
         <button className={`sa-tab ${activeTab === 'Revenue' ? 'active' : ''}`} onClick={() => setActiveTab('Revenue')}>Revenue</button>
-        <button className={`sa-tab ${activeTab === 'Engagement' ? 'active' : ''}`} onClick={() => setActiveTab('Engagement')}>Engagement</button>
         <button className={`sa-tab ${activeTab === 'AI Analytics' ? 'active' : ''}`} onClick={() => setActiveTab('AI Analytics')}>AI Analytics</button>
       </div>
 
       <div className="sa-stats-grid">
         {activeTab === 'Growth' && renderGrowth()}
         {activeTab === 'Revenue' && renderRevenue()}
-        {activeTab === 'Engagement' && renderEngagement()}
         {activeTab === 'AI Analytics' && renderAIStats()}
       </div>
     </div>
