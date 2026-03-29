@@ -171,7 +171,7 @@ const Statistics = () => {
               </svg>
               <div className="sa-pie-labels">
                   {Object.entries(dist).map(([name, count], i) => (
-                    <span key={i} className="sa-pie-label" style={{borderLeftColor: colors[name] || '#64748b'}}>
+                    <span key={i} className="sa-pie-label" style={{borderLeftColor: colors[name] || 'var(--sa-text-muted)'}}>
                       {name}: {count}
                     </span>
                   ))}

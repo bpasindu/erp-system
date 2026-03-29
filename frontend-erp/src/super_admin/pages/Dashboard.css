@@ -16,11 +16,11 @@
 }
 
 .sa-kpi-card {
-  background: white;
+  background: var(--sa-bg-card);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
   transition: transform 0.2s;
 }
 
@@ -36,7 +36,7 @@
 }
 
 .sa-kpi-title {
-  color: #64748b;
+  color: var(--sa-text-muted);
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
@@ -44,7 +44,7 @@
 }
 
 .sa-kpi-icon {
-  background: #f1f5f9;
+  background: var(--sa-bg-input);
   width: 36px;
   height: 36px;
   display: flex;
@@ -57,7 +57,7 @@
 .sa-kpi-value {
   font-size: 28px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--sa-text-main);
   margin-bottom: 4px;
 }
 
@@ -79,11 +79,11 @@
 }
 
 .sa-chart-card {
-  background: white;
+  background: var(--sa-bg-card);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
 }
 
 .sa-chart-title {
@@ -91,7 +91,7 @@
   font-weight: 600;
   margin-top: 0;
   margin-bottom: 24px;
-  color: #1e293b;
+  color: var(--sa-text-main);
 }
 
 .sa-dash-bar-chart {
@@ -141,11 +141,11 @@
 }
 
 .sa-quick-actions, .sa-recent-activity {
-  background: white;
+  background: var(--sa-bg-card);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
 }
 
 .sa-quick-actions h3, .sa-recent-activity h3 {
@@ -153,7 +153,7 @@
   font-weight: 600;
   margin-top: 0;
   margin-bottom: 20px;
-  color: #1e293b;
+  color: var(--sa-text-main);
 }
 
 .sa-action-btn {
@@ -162,13 +162,13 @@
   align-items: center;
   width: 100%;
   padding: 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--sa-bg-card);
+  border: 1px solid var(--sa-border-main);
   border-radius: 12px;
   margin-bottom: 12px;
   cursor: pointer;
   font-weight: 600;
-  color: #334155;
+  color: var(--sa-text-main);
   transition: all 0.2s;
 }
 
@@ -194,10 +194,10 @@
   position: relative;
   padding-left: 28px;
   padding-bottom: 24px;
-  border-left: 2px solid #f1f5f9;
+  border-left: 2px solid var(--sa-border-muted);
   margin-left: 8px;
   font-size: 14px;
-  color: #475569;
+  color: var(--sa-text-muted);
 }
 
 .sa-activity-list li:last-child {
@@ -212,7 +212,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid var(--sa-bg-card);
 }
 
 .sa-activity-list .dot.green { background-color: #10b981; }
