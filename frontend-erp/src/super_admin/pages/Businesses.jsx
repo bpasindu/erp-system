@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import BusinessRegisterModal from '../components/BusinessRegisterModal';
 import './Businesses.css';
 
@@ -9,7 +10,10 @@ const Businesses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchFromUrl = searchParams.get('search') || '';
+
+  const [searchTerm, setSearchTerm] = useState(searchFromUrl);
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [planFilter, setPlanFilter] = useState('All Plans');
 
@@ -40,6 +44,12 @@ const Businesses = () => {
   useEffect(() => {
     fetchBusinesses();
   }, [token]);
+
+  useEffect(() => {
+    if (searchFromUrl) {
+      setSearchTerm(searchFromUrl);
+    }
+  }, [searchFromUrl]);
 
   const handleSuspend = async (business) => {
     if (!window.confirm(`Are you sure you want to suspend ${business.name}?`)) return;
@@ -129,7 +139,7 @@ const Businesses = () => {
 
       <div className="sa-filters-toolbar">
         <div className="sa-search-input">
-          <span>🔍</span>
+          <span style={{cursor: 'pointer'}} onClick={() => console.log('Search triggered for:', searchTerm)}>🔍</span>
           <input 
             type="text" 
             placeholder="Search businesses..." 

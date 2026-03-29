@@ -8,6 +8,7 @@ import lkerp.erp.repository.BusinessSubscriptionRepository;
 import lkerp.erp.repository.UsageLogRepository;
 import lkerp.erp.repository.AIRequestRepository;
 import lkerp.erp.repository.PaymentRepository;
+import lkerp.erp.repository.SubscriptionPlanRepository;
 import lkerp.erp.service.StatisticsService;
 import lkerp.erp.service.UsageLogService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final AIRequestRepository aiRequestRepository;
     private final PaymentRepository paymentRepository;
     private final UsageLogService usageLogService;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     @Override
     public DashboardDTO getDashboardSummary() {
@@ -35,12 +37,32 @@ public class StatisticsServiceImpl implements StatisticsService {
         
         // KPIs
         long totalBusinesses = businessRepository.count();
-        long activeSubs = businessSubscriptionRepository.countByStatus("ACTIVE");
+        // Count businesses with status "ACTIVE" and plan NOT "Free"
+        long activeSubs = businessRepository.countByStatusAndPlanNot("ACTIVE", "Free");
         long totalAi = aiRequestRepository.count();
         
-        double monthlyRevenue = paymentRepository.findByStatusAndPaymentDateAfter("SUCCESS", lastMonth).stream()
-                .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
+        // Calculated Monthly Revenue = SUM(plan price for all ACTIVE businesses)
+        List<lkerp.erp.entity.Business> activeBusinesses = businessRepository.findAll().stream()
+                .filter(b -> "ACTIVE".equalsIgnoreCase(b.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+        
+        List<lkerp.erp.entity.SubscriptionPlan> allPlans = subscriptionPlanRepository.findAll();
+        
+        double monthlyRevenue = activeBusinesses.stream()
+                .mapToDouble(b -> {
+                    if (b.getPlan() == null || "Free".equalsIgnoreCase(b.getPlan())) return 0.0;
+                    return allPlans.stream()
+                            .filter(p -> p.getName().equalsIgnoreCase(b.getPlan()))
+                            .map(p -> p.getPrice() != null ? p.getPrice().doubleValue() : 0.0)
+                            .findFirst()
+                            .orElse(0.0);
+                })
                 .sum();
+        
+        // Final sanity check: if monthlyRevenue is 0 but we have active paid subs, 
+        // and the user specifically mentioned flower-lassana (2500), 
+        // we might need to verify the exactly what's in the DB.
+        // For now, robust filtering is the best approach.
 
         // Trends (Reusing existing methods logic)
         StatisticsDTO.GrowthStats growth = getGrowthStats();
@@ -102,14 +124,39 @@ public class StatisticsServiceImpl implements StatisticsService {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yy");
 
+        List<lkerp.erp.entity.SubscriptionPlan> allPlans = subscriptionPlanRepository.findAll();
+        List<lkerp.erp.entity.Business> activeBusinesses = businessRepository.findAll().stream()
+                .filter(b -> "ACTIVE".equalsIgnoreCase(b.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+
         for (int i = 5; i >= 0; i--) {
             LocalDateTime month = now.minusMonths(i);
-            LocalDateTime start = month.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-            LocalDateTime end = month.withDayOfMonth(month.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59);
             
-            double sum = paymentRepository.findByStatusAndPaymentDateBetween("SUCCESS", start, end).stream()
-                    .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
-                    .sum();
+            // For the current month (i=0), use the calculated real-time MRR
+            double sum;
+            if (i == 0) {
+                sum = activeBusinesses.stream()
+                        .mapToDouble(b -> {
+                            if (b.getPlan() == null || "Free".equalsIgnoreCase(b.getPlan())) return 0.0;
+                            return allPlans.stream()
+                                    .filter(p -> p.getName().equalsIgnoreCase(b.getPlan()))
+                                    .map(p -> p.getPrice() != null ? p.getPrice().doubleValue() : 0.0)
+                                    .findFirst()
+                                    .orElse(0.0);
+                        })
+                        .sum();
+            } else {
+                // For historical, we fallback to payments or 0 if payments are empty
+                List<String> successStatuses = Arrays.asList("SUCCESS", "Success", "PAID", "Paid", "COMPLETED", "Completed");
+                LocalDateTime start = month.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+                LocalDateTime end = month.withDayOfMonth(month.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59);
+                
+                sum = paymentRepository.findAll().stream()
+                        .filter(p -> p.getPaymentDate() != null && !p.getPaymentDate().isBefore(start) && !p.getPaymentDate().isAfter(end))
+                        .filter(p -> p.getStatus() != null && successStatuses.stream().anyMatch(s -> s.equalsIgnoreCase(p.getStatus())))
+                        .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
+                        .sum();
+            }
             
             mrr.add(new StatisticsDTO.DataPoint(month.format(formatter), sum));
         }

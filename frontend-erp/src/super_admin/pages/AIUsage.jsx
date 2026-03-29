@@ -139,7 +139,7 @@ const AIUsage = () => {
 
       <div className="sa-filters-toolbar">
         <div className="sa-search-input">
-          <span>🔍</span>
+          <span style={{cursor: 'pointer'}} onClick={() => console.log('Search triggered for:', searchTerm)}>🔍</span>
           <input 
             type="text" 
             placeholder="Search business..." 
