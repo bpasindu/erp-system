@@ -103,6 +103,20 @@ const Businesses = () => {
     }
   };
 
+  const formatLastActive = (dateStr) => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} mins ago`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hours ago`;
+    
+    return date.toISOString().slice(0, 10);
+  };
+
   const filteredBusinesses = useMemo(() => {
     return businesses.filter(b => {
       const actualPlan = b.plan || 'Free'; // fallback if null
@@ -126,13 +140,22 @@ const Businesses = () => {
           <h1 className="sa-page-title">Businesses</h1>
           <p className="sa-page-subtitle">Manage registered businesses</p>
         </div>
-        <button 
-          className="sa-btn-primary" 
-          onClick={() => setShowAddModal(true)}
-          style={{ padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-        >
-          + Add Business
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            className="sa-btn-outline" 
+            onClick={fetchBusinesses}
+            title="Refresh Data"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            🔄
+          </button>
+          <button 
+            className="sa-btn-primary" 
+            onClick={() => setShowAddModal(true)}
+          >
+            + Add Business
+          </button>
+        </div>
       </div>
 
       {error && <div className="sa-error">{error}</div>}
@@ -183,6 +206,7 @@ const Businesses = () => {
             {filteredBusinesses.map(b => {
               const isActive = (!b.status || b.status !== 'SUSPENDED');
               const createdDate = b.createdAt ? new Date(b.createdAt).toISOString().slice(0, 10) : '—';
+              const lastActiveDate = b.lastActiveAt ? new Date(b.lastActiveAt).toISOString().slice(0, 10) : '—';
               
               return (
                 <tr key={b.id}>
@@ -199,8 +223,8 @@ const Businesses = () => {
                       {isActive ? 'Active' : 'Suspended'}
                     </span>
                   </td>
-                  <td>{createdDate}</td>
-                  <td>{createdDate}</td> {/* Using createdDate as mock last active */}
+                  <td>{b.createdAt ? new Date(b.createdAt).toISOString().slice(0, 10) : '—'}</td>
+                  <td style={{ color: '#3b82f6', fontWeight: '500' }}>{formatLastActive(b.lastActiveAt)}</td>
                   <td className="sa-actions-cell">
                     <button className="sa-action-link warning" onClick={() => handleSuspend(b)}>
                       {isActive ? 'Suspend' : 'Activate'}

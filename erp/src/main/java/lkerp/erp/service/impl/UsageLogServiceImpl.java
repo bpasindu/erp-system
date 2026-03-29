@@ -34,6 +34,13 @@ public class UsageLogServiceImpl implements UsageLogService {
                 .createdAt(LocalDateTime.now())
                 .build();
         usageLogRepository.save(log);
+
+        if (businessId != null) {
+            businessRepository.findById(businessId).ifPresent(b -> {
+                b.setLastActiveAt(LocalDateTime.now());
+                businessRepository.save(b);
+            });
+        }
     }
 
     @Override

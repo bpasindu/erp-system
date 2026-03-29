@@ -32,6 +32,10 @@ public class Business {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "last_active_at")
+    @Builder.Default
+    private LocalDateTime lastActiveAt = LocalDateTime.now();
+
     // Relationships
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL)
     private List<User> users;

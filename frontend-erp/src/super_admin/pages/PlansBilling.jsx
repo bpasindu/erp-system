@@ -80,7 +80,7 @@ const PlansBilling = () => {
           <h1 className="sa-page-title">Plans & Billing</h1>
           <p className="sa-page-subtitle">Manage subscription plans</p>
         </div>
-        <button className="sa-btn-primary">+ Create Plan</button>
+        {/* <button className="sa-btn-primary">+ Create Plan</button> */}
       </div>
 
       <div className="sa-pb-grid">

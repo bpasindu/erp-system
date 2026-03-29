@@ -41,5 +41,6 @@ public class BusinessDTO {
         private String ownerEmail;
         private String email;
         private LocalDateTime createdAt;
+        private LocalDateTime lastActiveAt;
     }
 }

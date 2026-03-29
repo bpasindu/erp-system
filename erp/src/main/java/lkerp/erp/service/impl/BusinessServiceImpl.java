@@ -37,6 +37,7 @@ public class BusinessServiceImpl implements BusinessService {
         business.setPlan(request.getPlan());
         business.setOwnerEmail(request.getOwnerEmail());
         business.setEmail(request.getEmail());
+        business.setLastActiveAt(LocalDateTime.now());
         
         Business saved = businessRepository.save(business);
 
@@ -109,6 +110,7 @@ public class BusinessServiceImpl implements BusinessService {
                 .ownerEmail(ownerEmail)
                 .email(business.getEmail())
                 .createdAt(business.getCreatedAt())
+                .lastActiveAt(business.getLastActiveAt() != null ? business.getLastActiveAt() : business.getCreatedAt())
                 .build();
     }
 }
