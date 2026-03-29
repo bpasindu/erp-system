@@ -4,7 +4,6 @@ import lkerp.erp.dto.StatisticsDTO;
 import lkerp.erp.dto.DashboardDTO;
 import lkerp.erp.dto.UsageLogDTO;
 import lkerp.erp.repository.BusinessRepository;
-import lkerp.erp.repository.BusinessSubscriptionRepository;
 import lkerp.erp.repository.UsageLogRepository;
 import lkerp.erp.repository.AIRequestRepository;
 import lkerp.erp.repository.PaymentRepository;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final BusinessRepository businessRepository;
-    private final BusinessSubscriptionRepository businessSubscriptionRepository;
     private final UsageLogRepository usageLogRepository;
     private final AIRequestRepository aiRequestRepository;
     private final PaymentRepository paymentRepository;
@@ -161,10 +159,12 @@ public class StatisticsServiceImpl implements StatisticsService {
             mrr.add(new StatisticsDTO.DataPoint(month.format(formatter), sum));
         }
 
-        // Real plan distribution
-        Map<String, Long> planDist = businessSubscriptionRepository.findAll().stream()
-                .filter(s -> s.getPlan() != null)
-                .collect(Collectors.groupingBy(s -> s.getPlan().getName(), Collectors.counting()));
+        // Real plan distribution from Business table
+        Map<String, Long> planDist = activeBusinesses.stream()
+                .collect(Collectors.groupingBy(
+                    b -> b.getPlan() != null ? b.getPlan() : "Free", 
+                    Collectors.counting()
+                ));
 
         return StatisticsDTO.RevenueStats.builder()
                 .mrrTrend(mrr)

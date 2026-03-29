@@ -106,46 +106,79 @@ const Statistics = () => {
     </>
   );
 
-  const renderRevenue = () => (
-    <>
-      <div className="sa-stats-card sa-stats-wide">
-        <h3 className="sa-stats-card-title">MRR Trend</h3>
-        <div className="sa-chart-container">
-            <div className="sa-y-axis">
-                <span>600K</span><span>450K</span><span>300K</span><span>150K</span><span>0K</span>
-            </div>
-            <div className="sa-chart-content">
-                {renderGridLines(4)}
-                <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
-                    <path d={generateLinePath(data.revenue.mrrTrend, 500, 200, 600000, true)} 
-                        fill="rgba(34, 197, 94, 0.15)" />
-                    <path d={generateLinePath(data.revenue.mrrTrend, 500, 200, 600000)} 
-                        fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinejoin="round" />
-                </svg>
-            </div>
-        </div>
-        <div className="sa-x-axis">
-            {data.revenue.mrrTrend.map((p, i) => <span key={i}>{p.label}</span>)}
-        </div>
-      </div>
+  const renderRevenue = () => {
+    const dist = data.revenue.planDistribution || {};
+    const total = Object.values(dist).reduce((a, b) => a + b, 0);
+    
+    // Consistent color mapping
+    const colors = {
+      'Free': '#3b82f6',
+      'Starter': '#22c55e',
+      'Pro': '#f59e0b',
+      'Enterprise': '#a855f7'
+    };
+    
+    let currentOffset = 0;
+    const PI = 3.14159;
+    const circumference = 2 * PI * 40; // r=40
 
-      <div className="sa-stats-card sa-stats-wide">
-        <h3 className="sa-stats-card-title">Revenue Distribution</h3>
-        <div className="sa-pie-chart-container">
-            <svg viewBox="0 0 100 100" className="sa-pie-svg">
-                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#22c55e" strokeWidth="20" strokeDasharray="60 251.2" strokeDashoffset="0" />
-                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#3b82f6" strokeWidth="20" strokeDasharray="50 251.2" strokeDashoffset="-60" />
-                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#a855f7" strokeWidth="20" strokeDasharray="80 251.2" strokeDashoffset="-110" />
-                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#f59e0b" strokeWidth="20" strokeDasharray="61.2 251.2" strokeDashoffset="-190" />
-            </svg>
-            <div className="sa-pie-labels">
-                <span className="sa-pie-label green">Starter: 8</span>
-                <span className="sa-pie-label blue">Free: 4</span>
-                <span className="sa-pie-label orange">Pro: 6</span>
-                <span className="sa-pie-label purple">Enterprise: 7</span>
-            </div>
+    return (
+      <>
+        <div className="sa-stats-card sa-stats-wide">
+          <h3 className="sa-stats-card-title">MRR Trend</h3>
+          <div className="sa-chart-container">
+              <div className="sa-y-axis">
+                  <span>600K</span><span>450K</span><span>300K</span><span>150K</span><span>0K</span>
+              </div>
+              <div className="sa-chart-content">
+                  {renderGridLines(4)}
+                  <svg viewBox="0 0 500 200" className="sa-line-svg" preserveAspectRatio="none">
+                      <path d={generateLinePath(data.revenue.mrrTrend, 500, 200, 600000, true)} 
+                          fill="rgba(34, 197, 94, 0.15)" />
+                      <path d={generateLinePath(data.revenue.mrrTrend, 500, 200, 600000)} 
+                          fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinejoin="round" />
+                  </svg>
+              </div>
+          </div>
+          <div className="sa-x-axis">
+              {data.revenue.mrrTrend.map((p, i) => <span key={i}>{p.label}</span>)}
+          </div>
         </div>
-      </div>
+
+        <div className="sa-stats-card sa-stats-wide">
+          <h3 className="sa-stats-card-title">Revenue Distribution</h3>
+          <div className="sa-pie-chart-container">
+              <svg viewBox="0 0 100 100" className="sa-pie-svg">
+                  {Object.entries(dist).map(([name, count], i) => {
+                    const percentage = total > 0 ? (count / total) : 0;
+                    const dashArray = `${percentage * circumference} ${circumference}`;
+                    const dashOffset = -currentOffset;
+                    currentOffset += (percentage * circumference);
+                    
+                    return (
+                      <circle 
+                        key={i}
+                        cx="50" cy="50" r="40" 
+                        fill="transparent" 
+                        stroke={colors[name] || '#64748b'} 
+                        strokeWidth="20" 
+                        strokeDasharray={dashArray} 
+                        strokeDashoffset={dashOffset} 
+                      />
+                    );
+                  })}
+                  {total === 0 && <circle cx="50" cy="50" r="40" fill="transparent" stroke="#e2e8f0" strokeWidth="20" />}
+              </svg>
+              <div className="sa-pie-labels">
+                  {Object.entries(dist).map(([name, count], i) => (
+                    <span key={i} className="sa-pie-label" style={{borderLeftColor: colors[name] || '#64748b'}}>
+                      {name}: {count}
+                    </span>
+                  ))}
+                  {total === 0 && <span className="sa-pie-label gray">No active accounts</span>}
+              </div>
+          </div>
+        </div>
 
       <div className="sa-stats-card sa-stats-full">
         <h3 className="sa-stats-card-title">Monthly MRR Table</h3>
@@ -169,7 +202,8 @@ const Statistics = () => {
         </div>
       </div>
     </>
-  );
+    );
+  };
 
   const renderAIStats = () => (
     <>

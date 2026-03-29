@@ -123,7 +123,7 @@ const SuperAdminLayout = () => {
             <div className="sa-topbar-profile">
               <div className="sa-avatar small">SA</div>
               <span>Super Admin</span>
-              <span className="sa-dropdown-icon">▼</span>
+              {/* <span className="sa-dropdown-icon">▼</span> */}
             </div>
           </div>
         </header>
