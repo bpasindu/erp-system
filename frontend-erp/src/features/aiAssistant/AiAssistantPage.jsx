@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../products/ProductsPage.css';
 import './AiAssistantPage.css';
+import { API_BASE_URL } from '../../config';
 
 const AiAssistantPage = () => {
   const [activeTab, setActiveTab] = useState('insights');
@@ -78,21 +79,21 @@ const AiAssistantPage = () => {
         const headers = { Authorization: `Bearer ${token}` };
 
         // Fetch Customers
-        const custRes = await fetch(`http://localhost:8080/api/customers/business/${user.businessId}`, { headers });
+        const custRes = await fetch(`${API_BASE_URL}/api/customers/business/${user.businessId}`, { headers });
         const custData = await custRes.json();
         if (custData.success) {
           setCustomers(custData.data || []);
         }
 
         // Fetch Suppliers
-        const supRes = await fetch(`http://localhost:8080/api/suppliers/business/${user.businessId}`, { headers });
+        const supRes = await fetch(`${API_BASE_URL}/api/suppliers/business/${user.businessId}`, { headers });
         const supData = await supRes.json();
         if (supData.success) {
           setSuppliers(supData.data || []);
         }
 
         // Fetch Products
-        const prodRes = await fetch(`http://localhost:8080/api/products/business/${user.businessId}`, { headers });
+        const prodRes = await fetch(`${API_BASE_URL}/api/products/business/${user.businessId}`, { headers });
         const prodData = await prodRes.json();
         if (prodData.success) {
           setProducts(prodData.data || []);
@@ -202,7 +203,7 @@ const AiAssistantPage = () => {
   };
 
   const callNativeAI = async (prompt, requestType) => {
-    const res = await fetch(`http://localhost:8080/api/ai/request`, {
+    const res = await fetch(`${API_BASE_URL}/api/ai/request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

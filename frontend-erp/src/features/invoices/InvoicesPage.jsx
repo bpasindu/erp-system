@@ -3,8 +3,9 @@ import CreateInvoiceModal from './CreateInvoiceModal';
 import InvoiceViewModal from './InvoiceViewModal';
 import '../products/ProductsPage.css';
 import './InvoicesPage.css';
+import { API_BASE_URL as API_BASE } from '../../config';
 
-const API_BASE = 'http://localhost:8080';
+
 
 const InvoicesPage = () => {
   const [invoices, setInvoices] = useState([]);

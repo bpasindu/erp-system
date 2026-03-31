@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config';
 import './Dashboard.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -16,7 +15,7 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/api/admin/dashboard`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const json = await res.json();

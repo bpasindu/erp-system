@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Page2.css';
 import Sidebar from '../../common/layout/Sidebar';
 import TopHeader from '../../common/layout/TopHeader';
+import { API_BASE_URL as API_BASE } from '../../config';
 
 // Reusable Components
 const DashboardCard = ({ title, value, icon, description, trend }) => (
@@ -122,7 +123,7 @@ const LowStockList = ({ products }) => (
   </div>
 );
 
-const API_BASE = 'http://localhost:8080';
+// API URL configured in config.js
 
 const parseProductMeta = (product) => {
   let meta = {};

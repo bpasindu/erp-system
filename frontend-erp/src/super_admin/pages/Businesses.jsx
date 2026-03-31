@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { API_BASE_URL } from '../../config';
 import BusinessRegisterModal from '../components/BusinessRegisterModal';
 import './Businesses.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const Businesses = () => {
   const [businesses, setBusinesses] = useState([]);
@@ -24,7 +23,7 @@ const Businesses = () => {
   const fetchBusinesses = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/api/businesses`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/businesses`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -56,19 +55,13 @@ const Businesses = () => {
     
     try {
       const newStatus = business.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
-      const payload = {
-        name: business.name,
-        currency: business.currency || 'LKR',
-        status: newStatus
-      };
-
-      const res = await fetch(`${API_BASE}/api/businesses/${business.id}`, {
+      
+      const res = await fetch(`${API_BASE_URL}/api/admin/businesses/${business.id}/status?status=${newStatus}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
+        }
       });
       const data = await res.json();
       

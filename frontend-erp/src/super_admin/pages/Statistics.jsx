@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config';
 import './Statistics.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const Statistics = () => {
   const [activeTab, setActiveTab] = useState('Growth');
@@ -13,7 +12,7 @@ const Statistics = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/api/admin/statistics`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/statistics`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const json = await res.json();

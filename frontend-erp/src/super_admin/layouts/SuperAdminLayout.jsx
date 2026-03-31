@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config';
 import './SuperAdminLayout.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const SuperAdminLayout = () => {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ const SuperAdminLayout = () => {
   useEffect(() => {
     const fetchActiveCount = async () => {
        try {
-         const res = await fetch(`${API_BASE}/api/admin/dashboard`, {
+         const res = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
            headers: { Authorization: `Bearer ${token}` }
          });
          const json = await res.json();

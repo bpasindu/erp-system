@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import Sidebar from '../layouts/Sidebar';
+import { API_BASE_URL } from '../../config';
 import './UsageLogs.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const UsageLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -17,7 +17,7 @@ const UsageLogs = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch(`${API_BASE}/api/admin/usage-logs`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/usage-logs`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

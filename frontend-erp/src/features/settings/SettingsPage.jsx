@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../products/ProductsPage.css';
 import './SettingsPage.css';
+import { API_BASE_URL } from '../../config';
 
 const SettingsPage = () => {
   const [businessName, setBusinessName] = useState(
@@ -50,7 +51,7 @@ const SettingsPage = () => {
       }
 
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8080/api/users/${user.userId}/password`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/${user.userId}/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

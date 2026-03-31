@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AddProductModal from './AddProductModal';
 import AdjustStockModal from './AdjustStockModal';
 import './ProductsPage.css';
+import { API_BASE_URL as API_BASE } from '../../config';
 
-const API_BASE = 'http://localhost:8080';
+
 
 const normalizeProducts = (items) =>
   (Array.isArray(items) ? items : []).map((p) => {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../../config';
 import './BusinessRegisterModal.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const BusinessRegisterModal = ({ onClose, onSuccess }) => {
   const [name, setName] = useState('');
@@ -32,7 +31,7 @@ const BusinessRegisterModal = ({ onClose, onSuccess }) => {
         defaultPassword
       };
 
-      const res = await fetch(`${API_BASE}/api/businesses`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/businesses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

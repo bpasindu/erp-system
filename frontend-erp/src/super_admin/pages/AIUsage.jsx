@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { API_BASE_URL } from '../../config';
 import './AIUsage.css';
-
-const API_BASE = 'http://localhost:8080';
 
 const AIUsage = () => {
   const [logs, setLogs] = useState([]);
@@ -24,17 +23,17 @@ const AIUsage = () => {
       const headers = { Authorization: `Bearer ${token}` };
       
       // Fetch Summary
-      const summaryRes = await fetch(`${API_BASE}/api/admin/ai/summary`, { headers });
+      const summaryRes = await fetch(`${API_BASE_URL}/api/admin/ai/summary`, { headers });
       const summaryData = await summaryRes.json();
       if (summaryRes.ok && summaryData.success) setSummary(summaryData.data);
 
       // Fetch All Requests
-      const logsRes = await fetch(`${API_BASE}/api/admin/ai/requests`, { headers });
+      const logsRes = await fetch(`${API_BASE_URL}/api/admin/ai/requests`, { headers });
       const logsData = await logsRes.json();
       if (logsRes.ok && logsData.success) setLogs(logsData.data || []);
 
       // Fetch Flagged Requests
-      const flaggedRes = await fetch(`${API_BASE}/api/admin/ai/flagged`, { headers });
+      const flaggedRes = await fetch(`${API_BASE_URL}/api/admin/ai/flagged`, { headers });
       const flaggedData = await flaggedRes.json();
       if (flaggedRes.ok && flaggedData.success) setFlaggedLogs(flaggedData.data || []);
 
@@ -47,7 +46,7 @@ const AIUsage = () => {
 
   const handleMarkReviewed = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/ai/requests/${id}/review`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/ai/requests/${id}/review`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });

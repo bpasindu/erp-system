@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../products/ProductsPage.css';
 import './ReportsPage.css';
+import { API_BASE_URL as API_BASE } from '../../config';
 
-const API_BASE = 'http://localhost:8080';
+
 const TABS = ['sales', 'profit', 'bestSellers', 'balances'];
 
 const ReportsPage = () => {

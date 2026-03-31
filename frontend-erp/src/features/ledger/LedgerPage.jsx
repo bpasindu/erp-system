@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import AddEntryModal from './AddEntryModal';
 import '../products/ProductsPage.css';
 import './LedgerPage.css';
+import { API_BASE_URL as API_BASE } from '../../config';
 
-const API_BASE = 'http://localhost:8080';
+
 
 const formatDate = (value) => {
   if (!value) return '';
