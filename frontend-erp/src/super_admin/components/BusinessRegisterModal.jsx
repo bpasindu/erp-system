@@ -31,7 +31,7 @@ const BusinessRegisterModal = ({ onClose, onSuccess }) => {
         defaultPassword
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/admin/businesses`, {
+      const res = await fetch(`${API_BASE_URL}/api/businesses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

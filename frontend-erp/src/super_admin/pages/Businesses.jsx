@@ -23,7 +23,7 @@ const Businesses = () => {
   const fetchBusinesses = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/admin/businesses`, {
+      const res = await fetch(`${API_BASE_URL}/api/businesses`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -56,12 +56,22 @@ const Businesses = () => {
     try {
       const newStatus = business.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
       
-      const res = await fetch(`${API_BASE_URL}/api/admin/businesses/${business.id}/status?status=${newStatus}`, {
+      const payload = {
+        name: business.name,
+        currency: business.currency || 'LKR',
+        ownerEmail: business.ownerEmail || 'admin@smartbiz.lk',
+        status: newStatus,
+        plan: business.plan || 'Free',
+        defaultPassword: 'DUMMY_PASSWORD' // Required by DTO but ignored for updates
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/businesses/${business.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       
@@ -80,7 +90,7 @@ const Businesses = () => {
     if (!window.confirm(`Are you sure you want to completely delete ${name}? This action cannot be undone.`)) return;
     
     try {
-      const res = await fetch(`${API_BASE}/api/businesses/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/businesses/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
