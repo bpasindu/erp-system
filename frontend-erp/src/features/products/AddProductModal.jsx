@@ -19,6 +19,7 @@ const AddProductModal = ({
   error,
   initialValues,
   title = 'Add Product',
+  suppliers = [],
 }) => {
   const [form, setForm] = useState(initialFormState);
 
@@ -88,13 +89,20 @@ const AddProductModal = ({
               />
             </div>
             <div className="form-group">
-              <label htmlFor="supplier">Supplier</label>
-              <input
-                id="supplier"
-                name="supplier"
-                value={form.supplier}
+              <label htmlFor="supplierId">Supplier</label>
+              <select
+                id="supplierId"
+                name="supplierId"
+                value={form.supplierId || ''}
                 onChange={handleChange}
-              />
+              >
+                <option value="">None</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="buyingPrice">Buying Price</label>

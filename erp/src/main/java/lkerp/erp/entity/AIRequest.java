@@ -29,10 +29,19 @@ public class AIRequest {
     @Lob
     private String response;
 
+    @Lob
+    private String imageUrl;
+
     private String requestType; // EMAIL, INSIGHT, SUMMARY, MARKETING
     private Integer tokensUsed;
     private Double costEstimate;
     private String status; // SUCCESS, FAILED, PENDING
+    
+    @Builder.Default
+    private Boolean isFlagged = false;
+    
+    @Builder.Default
+    private Boolean isReviewed = false;
 
     @Column(name = "created_at")
     @Builder.Default

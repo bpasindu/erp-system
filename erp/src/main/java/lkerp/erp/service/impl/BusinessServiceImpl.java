@@ -36,6 +36,8 @@ public class BusinessServiceImpl implements BusinessService {
         business.setStatus(request.getStatus() != null ? request.getStatus() : "ACTIVE");
         business.setPlan(request.getPlan());
         business.setOwnerEmail(request.getOwnerEmail());
+        business.setEmail(request.getEmail());
+        business.setLastActiveAt(LocalDateTime.now());
         
         Business saved = businessRepository.save(business);
 
@@ -89,14 +91,26 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     private BusinessDTO.Response mapToResponse(Business business) {
+        String ownerEmail = business.getOwnerEmail();
+        // Fallback: if ownerEmail is null in business, try to find it from the users collection
+        if ((ownerEmail == null || ownerEmail.isEmpty()) && business.getUsers() != null) {
+            ownerEmail = business.getUsers().stream()
+                    .filter(u -> "BUSINESS_OWNER".equalsIgnoreCase(u.getRole()))
+                    .map(User::getEmail)
+                    .findFirst()
+                    .orElse(ownerEmail);
+        }
+
         return BusinessDTO.Response.builder()
                 .id(business.getId())
                 .name(business.getName())
                 .currency(business.getCurrency())
                 .status(business.getStatus())
                 .plan(business.getPlan())
-                .ownerEmail(business.getOwnerEmail())
+                .ownerEmail(ownerEmail)
+                .email(business.getEmail())
                 .createdAt(business.getCreatedAt())
+                .lastActiveAt(business.getLastActiveAt() != null ? business.getLastActiveAt() : business.getCreatedAt())
                 .build();
     }
 }

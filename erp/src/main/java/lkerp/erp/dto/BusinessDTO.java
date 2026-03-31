@@ -23,6 +23,7 @@ public class BusinessDTO {
         private String plan;
         @NotBlank(message = "Owner email is required")
         private String ownerEmail;
+        private String email;
         @NotBlank(message = "Default password is required")
         private String defaultPassword;
     }
@@ -38,6 +39,8 @@ public class BusinessDTO {
         private String status;
         private String plan;
         private String ownerEmail;
+        private String email;
         private LocalDateTime createdAt;
+        private LocalDateTime lastActiveAt;
     }
 }

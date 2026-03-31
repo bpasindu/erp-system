@@ -29,6 +29,17 @@
   border-bottom: 1px solid #fef08a;
 }
 
+.sa-dark-mode .sa-abuse-detection {
+  background-color: rgba(133, 77, 14, 0.1);
+  border-color: rgba(133, 77, 14, 0.3);
+}
+
+.sa-dark-mode .sa-abuse-header {
+  background-color: rgba(133, 77, 14, 0.2);
+  color: #fbbf24;
+  border-bottom-color: rgba(133, 77, 14, 0.3);
+}
+
 .sa-abuse-list {
   padding: 8px 20px;
 }
@@ -42,23 +53,29 @@
   color: #422006;
 }
 
+.sa-dark-mode .sa-abuse-item {
+  border-bottom-color: rgba(133, 77, 14, 0.2);
+  color: var(--sa-text-main);
+}
+
 .sa-abuse-item:last-child {
   border-bottom: none;
 }
 
 .sa-btn-outline {
   background: transparent;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--sa-border-main);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  color: var(--sa-text-main);
 }
 
 .sa-btn-outline:hover {
-  background-color: #f8fafc;
+  background-color: var(--sa-bg-input);
 }
 
 .sa-btn-outline.success-text {

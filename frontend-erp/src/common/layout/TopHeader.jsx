@@ -8,10 +8,6 @@ const TopHeader = () => {
         <input type="text" placeholder="Search..." aria-label="Search" />
       </div>
       <div className="header-actions">
-        <button className="icon-button notification-btn">
-          🔔
-          <span className="notification-badge"></span>
-        </button>
         <div className="profile-avatar">
           <span>SB</span>
         </div>

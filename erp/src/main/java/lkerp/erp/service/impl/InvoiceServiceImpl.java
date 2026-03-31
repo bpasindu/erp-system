@@ -93,7 +93,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         savedInvoice.setItems(invoiceItems);
         Invoice finalInvoice = invoiceRepository.save(savedInvoice);
 
-        usageLogService.log(business.getId(), null, "CREATE_INVOICE", "Created invoice " + finalInvoice.getInvoiceNumber() + " for total amount: " + finalInvoice.getTotalAmount());
+        usageLogService.log(business.getId(), null, "CREATE_INVOICE", "Created invoice " + finalInvoice.getInvoiceNumber() + " for total amount: " + finalInvoice.getTotalAmount(), "Billing", "127.0.0.1", "Success");
 
         return mapToResponse(finalInvoice);
     }
@@ -109,6 +109,20 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<InvoiceDTO.Response> getInvoicesByBusiness(Long businessId) {
         return invoiceRepository.findAll().stream()
                 .filter(i -> i.getBusiness().getId().equals(businessId))
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InvoiceDTO.Response> getUnpaidInvoicesByBusiness(Long businessId) {
+        return invoiceRepository.findByBusinessIdAndStatus(businessId, "UNPAID").stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InvoiceDTO.Response> getUnpaidInvoicesByCustomer(Long customerId) {
+        return invoiceRepository.findByCustomerIdAndStatus(customerId, "UNPAID").stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

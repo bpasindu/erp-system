@@ -34,6 +34,11 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success("Products retrieved", productService.getProductsByBusiness(businessId)));
     }
 
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<ApiResponse<List<ProductDTO.Response>>> getProductsBySupplier(@PathVariable Long supplierId) {
+        return ResponseEntity.ok(ApiResponse.success("Supplier products retrieved", productService.getProductsBySupplier(supplierId)));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductDTO.Response>> updateProduct(
             @PathVariable Long id, @Valid @RequestBody ProductDTO.Request request) {

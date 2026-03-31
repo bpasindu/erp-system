@@ -4,7 +4,7 @@
 
 .ai-tabs {
   display: inline-flex;
-  background: #e5e7eb;
+  background: var(--border-color);
   border-radius: 999px;
   padding: 0.2rem;
   margin-bottom: 1rem;
@@ -17,7 +17,7 @@
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #4b5563;
+  color: var(--text-muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -25,8 +25,8 @@
 }
 
 .ai-tab.active {
-  background: #ffffff;
-  color: #111827;
+  background: var(--card-bg);
+  color: var(--text-color);
 }
 
 .ai-content {
@@ -43,17 +43,18 @@
 
 .ai-chip {
   border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
   padding: 0.35rem 0.9rem;
   font-size: 0.8rem;
   cursor: pointer;
 }
 
 .ai-chat-panel {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
@@ -65,7 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -74,13 +75,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 .ai-chat-input-row input {
   flex: 1;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
   padding: 0.5rem 0.9rem;
   font-size: 0.9rem;
 }
@@ -98,9 +101,9 @@
 
 /* Shared card layout */
 .ai-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   padding: 1.25rem 1.5rem;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
@@ -115,7 +118,7 @@
   display: block;
   margin-bottom: 0.25rem;
   font-size: 0.8rem;
-  color: #4b5563;
+  color: var(--text-muted);
 }
 
 .ai-card .form-group select,
@@ -123,7 +126,9 @@
   width: 100%;
   padding: 0.5rem 0.65rem;
   border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
   font-size: 0.9rem;
 }
 
@@ -159,7 +164,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #d1d5db;
+  background-color: var(--border-color);
   transition: 0.2s;
   border-radius: 999px;
 }

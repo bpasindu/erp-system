@@ -16,48 +16,36 @@ const UsageLogs = () => {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      // As global audit logs might not be exposed easily without a dedicated admin endpoint,
-      // we'll fetch them if available or build a smart unified mock tied to the actual business data if the endpoint is restricted.
-      // Attempting to fetch from /api/audit-logs
-      const res = await fetch(`${API_BASE}/api/audit-logs`, {
+      setError('');
+      const res = await fetch(`${API_BASE}/api/admin/usage-logs`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       const data = await res.json();
       
       if (res.ok && data.success) {
-        setLogs(data.data || []);
+        // Map the backend data to the frontend structure
+        const mappedLogs = (data.data || []).map(log => ({
+          id: log.id,
+          timestamp: new Date(log.createdAt).toLocaleString(),
+          business: log.businessName,
+          user: log.userName,
+          action: log.action,
+          module: log.module || 'System',
+          ip: log.ip || '—',
+          result: log.result || 'Success'
+        }));
+        setLogs(mappedLogs);
       } else {
-        // Fallback to mock data if endpoint is locked or unavailable globally
-        generateMockLogs();
+        setError(data.message || 'Failed to fetch usage logs');
       }
     } catch (err) {
-      generateMockLogs();
+      setError('Network error while fetching logs');
     } finally {
       setLoading(false);
     }
   };
 
-  const generateMockLogs = () => {
-    // Generates a convincing set of logs matching the design
-    const modules = ['Billing', 'Reports', 'CRM', 'Auth', 'Inventory'];
-    const actions = ['Export Data', 'Update Profile', 'Update Product', 'Change Plan', 'Send Email', 'Add Customer'];
-    const users = ['Thilina Silva', 'Saman Herath', 'Nalin Fernando', 'Janaka Gunawardena', 'Roshan Dissanayake'];
-    const businesses = ['Smart Foods', 'Emerald Systems', 'Unity Industries', 'Neo Motors', 'Digital Holdings'];
-    
-    const mockData = Array.from({length: 20}).map((_, i) => ({
-      id: i,
-      timestamp: new Date(Date.now() - Math.random() * 100000000).toLocaleString(),
-      business: businesses[Math.floor(Math.random() * businesses.length)],
-      user: users[Math.floor(Math.random() * users.length)],
-      action: actions[Math.floor(Math.random() * actions.length)],
-      module: modules[Math.floor(Math.random() * modules.length)],
-      ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-      result: Math.random() > 0.1 ? 'Success' : 'Fail'
-    }));
-
-    setLogs(mockData);
-  };
 
   useEffect(() => {
     fetchLogs();
@@ -87,7 +75,7 @@ const UsageLogs = () => {
 
       <div className="sa-filters-toolbar">
         <div className="sa-search-input">
-          <span>🔍</span>
+          <span style={{cursor: 'pointer'}} onClick={() => console.log('Search triggered for:', searchTerm)}>🔍</span>
           <input 
             type="text" 
             placeholder="Search logs..." 

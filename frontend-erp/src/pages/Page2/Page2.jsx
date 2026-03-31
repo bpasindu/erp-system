@@ -20,21 +20,49 @@ const DashboardCard = ({ title, value, icon, description, trend }) => (
   </div>
 );
 
-const SalesChart = () => (
-  <div className="chart-container">
-    <h3 className="section-title">Sales Last 7 Days</h3>
-    <div className="chart-placeholder">
-      {/* CSS-based bar chart representation for the mockup */}
-      <div className="bar-wrapper"><div className="bar" style={{height: '40%'}}></div><span className="x-label">Mon</span></div>
-      <div className="bar-wrapper"><div className="bar" style={{height: '60%'}}></div><span className="x-label">Tue</span></div>
-      <div className="bar-wrapper"><div className="bar" style={{height: '35%'}}></div><span className="x-label">Wed</span></div>
-      <div className="bar-wrapper"><div className="bar" style={{height: '75%'}}></div><span className="x-label">Thu</span></div>
-      <div className="bar-wrapper"><div className="bar" style={{height: '55%'}}></div><span className="x-label">Fri</span></div>
-      <div className="bar-wrapper"><div className="bar" style={{height: '90%'}}></div><span className="x-label">Sat</span></div>
-      <div className="bar-wrapper"><div className="bar" style={{height: '45%'}}></div><span className="x-label">Sun</span></div>
+const SalesChart = ({ invoices }) => {
+  const last7Days = useMemo(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const dateStr = d.toISOString().slice(0, 10);
+      days.push({ label: dayName, dateStr, total: 0 });
+    }
+    
+    (invoices || []).forEach(inv => {
+      const date = inv.createdAt ? String(inv.createdAt).slice(0, 10) : '';
+      const dayObj = days.find(d => d.dateStr === date);
+      if (dayObj && inv.status === 'PAID') { // Option to only count PAID or all invoices. Let's count all or paid? Usually totalAmount is count if paid. Let's count all for now since older code counted all.
+        dayObj.total += Number(inv.totalAmount ?? 0);
+      } else if (dayObj) {
+         dayObj.total += Number(inv.totalAmount ?? 0);
+      }
+    });
+
+    const maxVal = Math.max(...days.map(d => d.total), 10); // arbitrary minimum max to prevent huge bars for tiny first sales
+    
+    return days.map(d => ({
+      ...d,
+      heightPercent: Math.round((d.total / maxVal) * 100)
+    }));
+  }, [invoices]);
+
+  return (
+    <div className="chart-container">
+      <h3 className="section-title">Sales Last 7 Days</h3>
+      <div className="chart-placeholder">
+        {last7Days.map((day, idx) => (
+          <div key={idx} className="bar-wrapper" title={`Rs. ${day.total.toLocaleString()}`}>
+            <div className="bar" style={{height: `${Math.max(day.heightPercent, 2)}%`}}></div>
+            <span className="x-label">{day.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const OrdersTable = ({ orders, onViewAll }) => (
   <div className="orders-container">
@@ -206,10 +234,9 @@ const Page2 = () => {
     let low = 0;
     let out = 0;
     products.forEach((p) => {
-      const qty = Number(p.stockQty ?? 0);
-      const reorder = Number(p.reorderLevel ?? 0);
-      if (qty === 0) out += 1;
-      if (qty > 0 && qty <= reorder) low += 1;
+      const qty = Number(p.stockQuantity ?? p.stockQty ?? 0);
+      if (qty <= 0) out += 1;
+      else if (qty < 5) low += 1;
     });
     return { low, out, total: products.length };
   }, [products]);
@@ -230,16 +257,15 @@ const Page2 = () => {
   const lowStockProducts = useMemo(() => {
     return products
       .filter((p) => {
-        const qty = Number(p.stockQty ?? 0);
-        const reorder = Number(p.reorderLevel ?? 0);
-        return qty > 0 && qty <= reorder;
+        const qty = Number(p.stockQuantity ?? p.stockQty ?? 0);
+        return qty > 0 && qty < 5;
       })
       .slice(0, 5)
       .map((p) => ({
         id: p.id,
         name: p.name,
         sku: p.sku,
-        qty: Number(p.stockQty ?? 0),
+        qty: Number(p.stockQuantity ?? p.stockQty ?? 0),
       }));
   }, [products]);
 
@@ -324,7 +350,7 @@ const Page2 = () => {
           <div className="content-grid">
             {/* Left Column (Chart) */}
             <div className="chart-section layout-card">
-              <SalesChart />
+              <SalesChart invoices={invoices} />
             </div>
 
             {/* Right Column (Invoices & Low Stock) */}

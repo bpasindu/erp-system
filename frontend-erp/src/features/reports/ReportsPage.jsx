@@ -1,11 +1,142 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../products/ProductsPage.css';
 import './ReportsPage.css';
 
+const API_BASE = 'http://localhost:8080';
 const TABS = ['sales', 'profit', 'bestSellers', 'balances'];
 
 const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState('sales');
+
+  const [invoices, setInvoices] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const token = localStorage.getItem('token');
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user'));
+    } catch {
+      return null;
+    }
+  })();
+  const businessId = user?.businessId;
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      if (!token || !businessId) {
+        setError('Authentication required');
+        return;
+      }
+      setLoading(true);
+      try {
+        const [invRes, txRes, custRes, prodRes] = await Promise.all([
+          fetch(`${API_BASE}/api/invoices/business/${businessId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/finance/transactions/business/${businessId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/customers/business/${businessId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/products/business/${businessId}`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        
+        const [inv, tx, cust, prod] = await Promise.all([invRes.json(), txRes.json(), custRes.json(), prodRes.json()]);
+
+        if (inv.success) setInvoices(inv.data || []);
+        if (tx.success) setTransactions(tx.data || []);
+        if (cust.success) setCustomers(cust.data || []);
+        if (prod.success) setProducts(prod.data || []);
+
+      } catch (err) {
+        setError('Failed to fetch report data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllData();
+  }, [token, businessId]);
+
+  // Derived Data
+  const weeklySales = useMemo(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push({
+        day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        dateStr: d.toISOString().slice(0, 10),
+        value: 0
+      });
+    }
+    invoices.forEach(inv => {
+      const date = inv.createdAt ? String(inv.createdAt).slice(0, 10) : '';
+      const dayObj = days.find(d => d.dateStr === date);
+      if (dayObj && inv.status === 'PAID') {
+        dayObj.value += Number(inv.totalAmount ?? 0);
+      } else if (dayObj) {
+         dayObj.value += Number(inv.totalAmount ?? 0);
+      }
+    });
+    const maxVal = Math.max(...days.map(d => d.value), 10);
+    return { days, maxVal };
+  }, [invoices]);
+
+  const profitStats = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    transactions.forEach(tx => {
+      const amount = Number(tx.amount ?? 0);
+      if (tx.type === 'INCOME') income += amount;
+      if (tx.type === 'EXPENSE') expense += amount;
+    });
+    return { income, expense, net: income - expense };
+  }, [transactions]);
+
+  const bestSellersData = useMemo(() => {
+    const salesMap = {};
+    invoices.forEach(inv => {
+      if (inv.items) {
+        inv.items.forEach(item => {
+          if (!salesMap[item.productId]) salesMap[item.productId] = 0;
+          salesMap[item.productId] += Number(item.quantity ?? 0);
+        });
+      }
+    });
+
+    const list = Object.entries(salesMap).map(([pId, qty]) => {
+      const p = products.find(prod => String(prod.id) === String(pId));
+      return {
+        name: p?.name || `Product #${pId}`,
+        value: qty
+      };
+    });
+
+    list.sort((a, b) => b.value - a.value);
+    const top5 = list.slice(0, 5);
+    const maxVal = Math.max(...top5.map(i => i.value), 10);
+    return { top5, maxVal };
+  }, [invoices, products]);
+
+  const customerBalances = useMemo(() => {
+    const balances = {};
+    invoices.forEach(inv => {
+      if (inv.status && inv.status.toUpperCase() !== 'PAID') {
+        const cId = inv.customerId;
+        if (!balances[cId]) balances[cId] = 0;
+        balances[cId] += Number(inv.totalAmount ?? 0);
+      }
+    });
+
+    const list = Object.entries(balances).map(([cId, amt]) => {
+      const cust = customers.find(c => String(c.id) === String(cId));
+      return {
+        name: cust?.name || `Customer #${cId}`,
+        amount: amt
+      };
+    }).filter(row => row.amount > 0);
+
+    return list.sort((a, b) => b.amount - a.amount);
+  }, [invoices, customers]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -14,19 +145,11 @@ const ReportsPage = () => {
           <div className="report-card">
             <h3 className="section-title">Weekly Sales</h3>
             <div className="weekly-sales-chart">
-              {[
-                { day: 'Mon', value: 13000 },
-                { day: 'Tue', value: 19000 },
-                { day: 'Wed', value: 9000 },
-                { day: 'Thu', value: 21000 },
-                { day: 'Fri', value: 15000 },
-                { day: 'Sat', value: 26000 },
-                { day: 'Sun', value: 9000 },
-              ].map((entry) => (
-                <div key={entry.day} className="weekly-bar-wrapper">
+              {weeklySales.days.map((entry) => (
+                <div key={entry.day} className="weekly-bar-wrapper" title={`Rs. ${entry.value.toLocaleString()}`}>
                   <div
                     className="weekly-bar"
-                    style={{ height: `${(entry.value / 26000) * 100}%` }}
+                    style={{ height: `${Math.max((entry.value / weeklySales.maxVal) * 100, 2)}%` }}
                   ></div>
                   <span className="weekly-label">{entry.day}</span>
                 </div>
@@ -35,21 +158,27 @@ const ReportsPage = () => {
           </div>
         );
       case 'profit':
+        const total = profitStats.income + profitStats.expense || 1;
+        const incPct = (profitStats.income / total) * 100;
+        const expPct = (profitStats.expense / total) * 100;
+
         return (
           <div className="profit-layout">
             <div className="report-card">
               <h3 className="section-title">Income vs Expenses</h3>
               <div className="profit-chart">
-                <div className="pie-chart">
-                  <div className="pie-income"></div>
-                  <div className="pie-expense"></div>
+                <div className="pie-chart" style={
+                  profitStats.income === 0 && profitStats.expense === 0 
+                  ? { background: '#e5e7eb' } 
+                  : { background: `conic-gradient(#10b981 0% ${incPct}%, #ef4444 ${incPct}% 100%)`}
+                }>
                 </div>
                 <div className="pie-legend">
                   <span className="income-label">
-                    Income: Rs. 53,020
+                    Income: Rs. {profitStats.income.toLocaleString()}
                   </span>
                   <span className="expense-label">
-                    Expenses: Rs. 74,200
+                    Expenses: Rs. {profitStats.expense.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -59,15 +188,17 @@ const ReportsPage = () => {
               <div className="profit-summary">
                 <div>
                   <span className="summary-label">Total Income</span>
-                  <span className="summary-income">Rs. 53,020</span>
+                  <span className="summary-income">Rs. {profitStats.income.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="summary-label">Total Expenses</span>
-                  <span className="summary-expense">Rs. 74,200</span>
+                  <span className="summary-expense">Rs. {profitStats.expense.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="summary-label">Net Profit</span>
-                  <span className="summary-net">Rs. -21,180</span>
+                  <span className="summary-net" style={{ color: profitStats.net < 0 ? '#ef4444' : '#10b981' }}>
+                    Rs. {profitStats.net.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -78,22 +209,16 @@ const ReportsPage = () => {
           <div className="report-card">
             <h3 className="section-title">Top 5 Best-Selling Products</h3>
             <div className="best-sellers-list">
-              {[
-                { name: 'Notebook A5', value: 55 },
-                { name: 'Paper Clips Box', value: 35 },
-                { name: 'Ethernet Cable 3m', value: 22 },
-                { name: 'Wireless Mouse', value: 18 },
-                { name: 'Whiteboard Marker Set', value: 12 },
-              ].map((item) => (
+              {bestSellersData.top5.length === 0 ? <p style={{color:'#6b7280'}}>No distinct items sold yet.</p> : bestSellersData.top5.map((item) => (
                 <div key={item.name} className="best-seller-row">
                   <span className="best-seller-name">{item.name}</span>
                   <div className="best-seller-bar-wrapper">
                     <div
                       className="best-seller-bar"
-                      style={{ width: `${(item.value / 55) * 100}%` }}
+                      style={{ width: `${Math.max((item.value / bestSellersData.maxVal) * 100, 2)}%` }}
                     ></div>
                   </div>
-                  <span className="best-seller-value">{item.value}</span>
+                  <span className="best-seller-value">{item.value} sold</span>
                 </div>
               ))}
             </div>
@@ -102,7 +227,7 @@ const ReportsPage = () => {
       case 'balances':
         return (
           <div className="report-card">
-            <h3 className="section-title">Customer Balances</h3>
+            <h3 className="section-title">Customer Balances (Unpaid)</h3>
             <table className="products-table balances-table">
               <thead>
                 <tr>
@@ -111,15 +236,12 @@ const ReportsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { name: 'Kamal Perera', amount: 'Rs. 4,675' },
-                  { name: 'Nishani Fernando', amount: 'Rs. 18,287' },
-                  { name: 'Sanduni Silva', amount: 'Rs. 15,444' },
-                  { name: 'Ruwan Bandara', amount: 'Rs. 3,960' },
-                ].map((row) => (
+                {customerBalances.length === 0 ? (
+                  <tr><td colSpan="2" style={{textAlign:'center', color:'#6b7280', padding: '1rem'}}>All balances are settled.</td></tr>
+                ) : customerBalances.map((row) => (
                   <tr key={row.name}>
                     <td>{row.name}</td>
-                    <td className="balance-amount">{row.amount}</td>
+                    <td className="balance-amount">Rs. {row.amount.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -176,7 +298,9 @@ const ReportsPage = () => {
         </button>
       </div>
 
-      <div className="reports-content">{renderContent()}</div>
+      <div className="reports-content">
+        {loading ? <div style={{ color: '#6b7280' }}>Loading report metrics...</div> : renderContent()}
+      </div>
     </div>
   );
 };

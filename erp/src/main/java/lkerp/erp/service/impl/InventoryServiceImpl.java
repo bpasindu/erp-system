@@ -181,7 +181,7 @@ public class InventoryServiceImpl implements InventoryService {
         productRepository.save(product);
         int newProductTotal = product.getStockQuantity();
 
-        usageLogService.log(business.getId(), null, "ADD_STOCK", "Added " + qty + " units of " + product.getName() + " to warehouse ID " + warehouse.getId());
+        usageLogService.log(business.getId(), null, "ADD_STOCK", "Added " + qty + " units of " + product.getName() + " to warehouse ID " + warehouse.getId(), "Inventory", "127.0.0.1", "Success");
 
         return InventoryDTO.AddStockResponse.builder()
                 .movementId(savedMovement.getId())

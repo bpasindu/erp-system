@@ -5,68 +5,71 @@ const API_BASE = 'http://localhost:8080';
 
 const AIUsage = () => {
   const [logs, setLogs] = useState([]);
+  const [flaggedLogs, setFlaggedLogs] = useState([]);
+  const [summary, setSummary] = useState({
+    totalRequests: 0,
+    avgRequestsPerBusiness: 0.0,
+    topFeature: 'N/A',
+    totalCostEstimate: 0.0
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('All');
 
   const token = localStorage.getItem('token');
 
-  const fetchAILogs = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      // Attempting to fetch from actual AIRequest endpoint
-      const res = await fetch(`${API_BASE}/api/admin/ai-requests`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
+      const headers = { Authorization: `Bearer ${token}` };
       
-      if (res.ok && data.success && data.data) {
-        setLogs(data.data);
-      } else {
-        generateMockAILogs();
-      }
+      // Fetch Summary
+      const summaryRes = await fetch(`${API_BASE}/api/admin/ai/summary`, { headers });
+      const summaryData = await summaryRes.json();
+      if (summaryRes.ok && summaryData.success) setSummary(summaryData.data);
+
+      // Fetch All Requests
+      const logsRes = await fetch(`${API_BASE}/api/admin/ai/requests`, { headers });
+      const logsData = await logsRes.json();
+      if (logsRes.ok && logsData.success) setLogs(logsData.data || []);
+
+      // Fetch Flagged Requests
+      const flaggedRes = await fetch(`${API_BASE}/api/admin/ai/flagged`, { headers });
+      const flaggedData = await flaggedRes.json();
+      if (flaggedRes.ok && flaggedData.success) setFlaggedLogs(flaggedData.data || []);
+
     } catch (err) {
-      generateMockAILogs();
+      console.error('Error fetching AI data:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateMockAILogs = () => {
-    const businesses = ['Pro Tech', 'Metro Tech', 'Digital Holdings', 'Nova Corp', 'Emerald Systems', 'Island Ventures'];
-    const features = ['Marketing Post', 'Insights', 'Invoice Summary', 'Supplier Analysis'];
-    
-    const mockData = Array.from({length: 25}).map((_, i) => {
-      const isAbuse = Math.random() < 0.15;
-      const tokens = isAbuse ? Math.floor(Math.random() * 2000) + 1500 : Math.floor(Math.random() * 500) + 50;
-      
-      return {
-        id: i,
-        timestamp: new Date(Date.now() - Math.random() * 50000000).toLocaleString(),
-        business: businesses[Math.floor(Math.random() * businesses.length)],
-        feature: features[Math.floor(Math.random() * features.length)],
-        promptLen: Math.floor(tokens * 0.2),
-        tokens: tokens,
-        outcome: Math.random() > 0.05 ? 'Success' : 'Failed',
-        isAbuse: isAbuse
-      };
-    });
-
-    setLogs(mockData);
+  const handleMarkReviewed = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/ai/requests/${id}/review`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setFlaggedLogs(prev => prev.filter(l => l.id !== id));
+      }
+    } catch (err) {
+      console.error('Error reviewing AI request:', err);
+    }
   };
 
   useEffect(() => {
-    fetchAILogs();
+    fetchData();
   }, [token]);
 
-  const flaggedLogs = useMemo(() => logs.filter(l => l.isAbuse), [logs]);
-  
   const filteredLogs = useMemo(() => {
     return logs.filter(l => {
-      const matchesSearch = l.business.toLowerCase().includes(searchTerm.toLowerCase());
+      const businessName = l.businessName || 'Unknown';
+      const matchesSearch = businessName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filter === 'All' || 
-                           (filter === 'High Token Usage' && l.tokens > 1000) ||
-                           (filter === 'Failed Requests' && l.outcome === 'Failed');
+                           (filter === 'High Token Usage' && l.tokensUsed > 1000) ||
+                           (filter === 'Failed Requests' && l.status === 'FAILED');
       return matchesSearch && matchesFilter;
     });
   }, [logs, searchTerm, filter]);
@@ -86,28 +89,28 @@ const AIUsage = () => {
             <span className="sa-kpi-title">Total AI Requests</span>
             <span className="sa-kpi-icon">🧠</span>
           </div>
-          <div className="sa-kpi-value">150</div>
+          <div className="sa-kpi-value">{summary.totalRequests}</div>
         </div>
         <div className="sa-kpi-card">
           <div className="sa-kpi-header">
             <span className="sa-kpi-title">Avg / Business</span>
             <span className="sa-kpi-icon">📈</span>
           </div>
-          <div className="sa-kpi-value">6.0</div>
+          <div className="sa-kpi-value">{summary.avgRequestsPerBusiness.toFixed(1)}</div>
         </div>
         <div className="sa-kpi-card">
           <div className="sa-kpi-header">
             <span className="sa-kpi-title">Top Feature</span>
             <span className="sa-kpi-icon">⚡</span>
           </div>
-          <div className="sa-kpi-value" style={{fontSize: '22px'}}>Insights</div>
+          <div className="sa-kpi-value" style={{fontSize: '22px'}}>{summary.topFeature}</div>
         </div>
         <div className="sa-kpi-card">
           <div className="sa-kpi-header">
             <span className="sa-kpi-title">Est. AI Cost</span>
             <span className="sa-kpi-icon">💲</span>
           </div>
-          <div className="sa-kpi-value">$7.74</div>
+          <div className="sa-kpi-value">${summary.totalCostEstimate.toFixed(2)}</div>
         </div>
       </div>
 
@@ -120,9 +123,14 @@ const AIUsage = () => {
             {flaggedLogs.slice(0, 5).map(log => (
               <div key={`abuse-${log.id}`} className="sa-abuse-item">
                 <div className="sa-abuse-info">
-                  <strong>{log.business}</strong> — {log.feature} — {log.tokens} tokens
+                  <strong>{log.businessName}</strong> — {log.requestType} — {log.tokensUsed} tokens
                 </div>
-                <button className="sa-btn-outline success-text">✓ Mark Reviewed</button>
+                <button 
+                  className="sa-btn-outline success-text"
+                  onClick={() => handleMarkReviewed(log.id)}
+                >
+                  ✓ Mark Reviewed
+                </button>
               </div>
             ))}
           </div>
@@ -131,7 +139,7 @@ const AIUsage = () => {
 
       <div className="sa-filters-toolbar">
         <div className="sa-search-input">
-          <span>🔍</span>
+          <span style={{cursor: 'pointer'}} onClick={() => console.log('Search triggered for:', searchTerm)}>🔍</span>
           <input 
             type="text" 
             placeholder="Search business..." 
@@ -164,20 +172,22 @@ const AIUsage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredLogs.map(l => (
+            {(filteredLogs || []).map(l => (
               <tr key={l.id}>
-                <td style={{color: '#64748b', fontSize: '13px'}}>{l.timestamp}</td>
-                <td><strong>{l.business}</strong></td>
-                <td>{l.feature}</td>
-                <td>{l.promptLen}</td>
-                <td>{l.tokens}</td>
+                <td style={{color: '#64748b', fontSize: '13px'}}>
+                  {new Date(l.createdAt).toLocaleString()}
+                </td>
+                <td><strong>{l.businessName}</strong></td>
+                <td>{l.requestType}</td>
+                <td>{l.prompt?.length || 0}</td>
+                <td>{l.tokensUsed}</td>
                 <td>
-                  <span className={`sa-status-badge ${l.outcome === 'Success' ? 'active' : 'suspended'}`}>
-                    {l.outcome}
+                  <span className={`sa-status-badge ${l.status === 'SUCCESS' ? 'active' : 'suspended'}`}>
+                    {l.status}
                   </span>
                 </td>
                 <td className="sa-actions-cell">
-                  <button className="sa-action-link">Details</button>
+                  <button className="sa-action-link" onClick={() => alert(l.prompt)}>Details</button>
                 </td>
               </tr>
             ))}

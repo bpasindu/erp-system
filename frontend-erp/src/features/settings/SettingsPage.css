@@ -3,9 +3,9 @@
 }
 
 .settings-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   padding: 1.5rem 1.75rem;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
   margin-bottom: 1rem;
@@ -16,7 +16,7 @@
   margin: 0 0 1rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .settings-form {
@@ -29,7 +29,7 @@
   display: block;
   margin-bottom: 0.25rem;
   font-size: 0.8rem;
-  color: #4b5563;
+  color: var(--text-muted);
 }
 
 .settings-form .form-group input,
@@ -37,7 +37,9 @@
   width: 100%;
   padding: 0.55rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
   font-size: 0.9rem;
 }
 
@@ -71,7 +73,7 @@
 
 .settings-label {
   font-size: 0.9rem;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .settings-danger-btn {
@@ -107,7 +109,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #d1d5db;
+  background-color: var(--border-color);
   transition: 0.2s;
   border-radius: 999px;
 }

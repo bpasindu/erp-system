@@ -53,7 +53,7 @@ public class AuthController {
                 .build();
 
         if (user.getBusiness() != null) {
-            usageLogService.log(user.getBusiness().getId(), user.getId(), "LOGIN", "User logged into the system via email: " + user.getEmail());
+            usageLogService.log(user.getBusiness().getId(), user.getId(), "LOGIN", "User logged into the system via email: " + user.getEmail(), "Auth", "10.0.0.1", "Success");
         }
 
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));

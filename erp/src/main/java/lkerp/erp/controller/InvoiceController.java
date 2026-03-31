@@ -41,6 +41,16 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Invoice status updated", invoiceService.updateInvoiceStatus(id, status)));
     }
 
+    @GetMapping("/unpaid/business/{businessId}")
+    public ResponseEntity<ApiResponse<List<InvoiceDTO.Response>>> getUnpaidInvoices(@PathVariable Long businessId) {
+        return ResponseEntity.ok(ApiResponse.success("Unpaid invoices retrieved", invoiceService.getUnpaidInvoicesByBusiness(businessId)));
+    }
+
+    @GetMapping("/unpaid/customer/{customerId}")
+    public ResponseEntity<ApiResponse<List<InvoiceDTO.Response>>> getUnpaidInvoicesByCustomer(@PathVariable Long customerId) {
+        return ResponseEntity.ok(ApiResponse.success("Unpaid customer invoices retrieved", invoiceService.getUnpaidInvoicesByCustomer(customerId)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteInvoice(@PathVariable Long id) {
         invoiceService.deleteInvoice(id);

@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [businessName, setBusinessName] = useState(
+    localStorage.getItem('businessName') || 'SmartBiz'
+  );
+
+  useEffect(() => {
+    const handleNameChange = () => {
+      setBusinessName(localStorage.getItem('businessName') || 'SmartBiz');
+    };
+    
+    window.addEventListener('businessNameChange', handleNameChange);
+    return () => window.removeEventListener('businessNameChange', handleNameChange);
+  }, []);
+  
   const getNavClass = ({ isActive }) =>
     `nav-item${isActive ? ' active' : ''}`;
 
@@ -15,7 +28,7 @@ const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <h2 className="brand-name">SmartBiz</h2>
+        <h2 className="brand-name">{businessName}</h2>
         <button className="menu-toggle">☰</button>
       </div>
 

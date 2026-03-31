@@ -7,7 +7,7 @@ const PlansBilling = () => {
       name: 'Free',
       monthly: 0,
       annual: 0,
-      users: 2,
+      users: 1,
       invoices: 50,
       aiRequests: 10,
       storage: '1 GB',
@@ -80,7 +80,7 @@ const PlansBilling = () => {
           <h1 className="sa-page-title">Plans & Billing</h1>
           <p className="sa-page-subtitle">Manage subscription plans</p>
         </div>
-        <button className="sa-btn-primary">+ Create Plan</button>
+        {/* <button className="sa-btn-primary">+ Create Plan</button> */}
       </div>
 
       <div className="sa-pb-grid">
@@ -111,9 +111,9 @@ const PlansBilling = () => {
             <div className="sa-pb-footer">
               <span className="sa-pb-subs">{plan.subscribers} subscribers</span>
               <div className="sa-pb-actions">
-                <button className="sa-icon-action text-blue">Edit</button>
+                {/* <button className="sa-icon-action text-blue">Edit</button>
                 <button className="sa-icon-action text-gray">Dup</button>
-                <button className="sa-icon-action text-orange">Disable</button>
+                <button className="sa-icon-action text-orange">Disable</button> */}
               </div>
             </div>
           </div>

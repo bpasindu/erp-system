@@ -32,11 +32,11 @@
 }
 
 .sa-pb-card {
-  background: white;
+  background: var(--sa-bg-card);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
   display: flex;
   flex-direction: column;
 }
@@ -46,7 +46,7 @@
   font-weight: 600;
   margin-top: 0;
   margin-bottom: 20px;
-  color: #0f172a;
+  color: var(--sa-text-main);
 }
 
 .sa-pb-pricing {
@@ -63,14 +63,15 @@
 
 .sa-pb-price small {
   font-size: 14px;
-  color: #64748b;
+  color: var(--sa-text-muted);
   font-weight: 500;
 }
 
 .sa-pb-annual {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--sa-text-muted);
   margin-top: 4px;
+  opacity: 0.8;
 }
 
 .sa-pb-limits {
@@ -79,11 +80,11 @@
   gap: 8px;
   font-size: 13px;
   margin-bottom: 24px;
-  color: #475569;
+  color: var(--sa-text-main);
 }
 
 .sa-pb-label {
-  color: #64748b;
+  color: var(--sa-text-muted);
 }
 
 .sa-pb-features {
@@ -108,17 +109,18 @@
 }
 
 .sa-pb-features li.included {
-  color: #475569;
+  color: var(--sa-text-main);
 }
 .sa-pb-features li.included .icon {
   color: #10b981;
 }
 
 .sa-pb-features li.excluded {
-  color: #94a3b8;
+  color: var(--sa-text-muted);
+  opacity: 0.6;
 }
 .sa-pb-features li.excluded .icon {
-  color: #94a3b8;
+  color: var(--sa-text-muted);
 }
 
 .sa-pb-footer {
@@ -126,12 +128,12 @@
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--sa-border-main);
   padding-top: 16px;
 }
 
 .sa-pb-subs {
-  color: #64748b;
+  color: var(--sa-text-muted);
 }
 
 .sa-pb-actions {

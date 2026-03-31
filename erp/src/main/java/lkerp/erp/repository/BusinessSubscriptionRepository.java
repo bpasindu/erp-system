@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BusinessSubscriptionRepository extends JpaRepository<BusinessSubscription, Long> {
+    long countByStatus(String status);
 }
