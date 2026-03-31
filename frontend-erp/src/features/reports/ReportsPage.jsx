@@ -138,12 +138,31 @@ const ReportsPage = () => {
     return list.sort((a, b) => b.amount - a.amount);
   }, [invoices, customers]);
 
+  const recentWeeklyInvoices = useMemo(() => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    return invoices
+      .filter(inv => {
+        const invDate = new Date(inv.createdAt);
+        return invDate >= sevenDaysAgo;
+      })
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map(inv => ({
+        id: inv.invoiceNumber || `INV-${inv.id}`,
+        customerName: customers.find(c => String(c.id) === String(inv.customerId))?.name || 'Unknown Customer',
+        amount: Number(inv.totalAmount || 0).toLocaleString(),
+        status: (inv.status || 'UNPAID').toLowerCase(),
+        date: new Date(inv.createdAt).toLocaleDateString()
+      }));
+  }, [invoices, customers]);
+
   const renderContent = () => {
     switch (activeTab) {
       case 'sales':
         return (
           <div className="report-card">
-            <h3 className="section-title">Weekly Sales</h3>
+            <h3 className="section-title">Sales Last 7 Days</h3>
             <div className="weekly-sales-chart">
               {weeklySales.days.map((entry) => (
                 <div key={entry.day} className="weekly-bar-wrapper" title={`Rs. ${entry.value.toLocaleString()}`}>
@@ -154,6 +173,33 @@ const ReportsPage = () => {
                   <span className="weekly-label">{entry.day}</span>
                 </div>
               ))}
+            </div>
+
+            <div style={{marginTop: '2.5rem'}}>
+              <h3 className="section-title">Detailed Weekly Sales</h3>
+              <div className="orders-list">
+                {recentWeeklyInvoices.length === 0 ? (
+                  <p style={{color: '#6b7280', fontSize: '0.9rem', padding: '1.5rem 0'}}>
+                    No sales recorded in the last 7 days.
+                  </p>
+                ) : (
+                  recentWeeklyInvoices.map((inv) => (
+                    <div className="order-item" key={inv.id}>
+                      <div className="order-info">
+                        <span className="order-id">{inv.id}</span>
+                        <span className="recent-order-name">— {inv.customerName}</span>
+                        <div className="order-date">{inv.date}</div>
+                      </div>
+                      <div className="order-amount-status">
+                         <span className="order-amount">Rs. {inv.amount}</span>
+                         <span className={`status-badge ${inv.status}`}>
+                          {inv.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         );
