@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Sidebar from '../layouts/Sidebar';
 import { API_BASE_URL } from '../../config';
 import './UsageLogs.css';
 
