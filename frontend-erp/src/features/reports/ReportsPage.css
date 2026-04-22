@@ -1,0 +1,304 @@
+.reports-page {
+  padding-top: 1.75rem;
+}
+
+.reports-tabs {
+  display: inline-flex;
+  background: var(--border-color);
+  border-radius: 999px;
+  padding: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.reports-tab {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.reports-tab.active {
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+.export-btn {
+  padding-inline: 0.9rem;
+}
+
+.report-card {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.reports-content {
+  margin-top: 0.5rem;
+}
+
+/* Sales tab */
+.weekly-sales-chart {
+  margin-top: 1.5rem;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 1rem 0;
+  border-left: 1px dashed var(--border-color);
+  border-bottom: 1px dashed var(--border-color);
+  position: relative;
+}
+
+/* Y-axis grid lines (dashed like dashboard) */
+.weekly-sales-chart::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--border-color);
+}
+
+.weekly-sales-chart::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--border-color);
+}
+
+.weekly-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  width: 10%;
+  padding-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.weekly-bar {
+  width: 100%;
+  background: #2563eb;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.weekly-bar:hover {
+  background: #1d4ed8;
+}
+
+.weekly-label {
+  position: absolute;
+  bottom: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Profit tab */
+.profit-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.profit-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pie-chart {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: conic-gradient(#22c55e 0 220deg, #2563eb 220deg 360deg);
+}
+
+.pie-income,
+.pie-expense {
+  display: none;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.income-label {
+  color: #2563eb;
+}
+
+.expense-label {
+  color: #22c55e;
+}
+
+.profit-summary-card .profit-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.summary-income {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.summary-expense {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.summary-net {
+  color: var(--text-color);
+  font-weight: 700;
+}
+
+/* Best sellers tab */
+.best-sellers-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.best-seller-row {
+  display: grid;
+  grid-template-columns: 2.2fr 3fr 0.5fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.best-seller-name {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.best-seller-bar-wrapper {
+  background: var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+  height: 8px;
+}
+
+.best-seller-bar {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 999px;
+}
+
+.best-seller-value {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Balances tab */
+.balances-table .balance-amount {
+  color: #dc2626;
+}
+
+
+/* Detailed Sales List (Styled like Dashboard) */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.order-id {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.recent-order-name {
+  font-weight: 500;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  margin-left: 0.5rem;
+}
+
+.order-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.order-amount-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.order-amount {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.status-badge {
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.paid {
+  background-color: #10b981;
+  color: white;
+}
+
+.status-badge.unpaid {
+  background-color: #ef4444;
+  color: white;
+}
+
+@media (max-width: 1024px) {
+  .profit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+

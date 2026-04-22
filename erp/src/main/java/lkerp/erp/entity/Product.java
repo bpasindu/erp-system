@@ -24,12 +24,22 @@ public class Product {
     @JoinColumn(name = "category_id")
     private ProductCategory category;
 
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
     private String name;
     private String sku;
     private String description;
     
     private BigDecimal price;
     private BigDecimal cost;
+
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
+
+    @Column(name = "reorder_level")
+    private Integer reorderLevel;
 
     @Column(name = "created_at")
     @Builder.Default

@@ -1,0 +1,179 @@
+/* Businesses.css */
+.sa-businesses {
+  animation: fadeIn 0.3s ease;
+}
+
+.sa-filters-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  background: var(--sa-bg-card);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
+}
+
+.sa-search-input {
+  display: flex;
+  align-items: center;
+  background: var(--sa-bg-input);
+  padding: 8px 16px;
+  border-radius: 8px;
+  width: 320px;
+}
+
+.sa-search-input span {
+  color: var(--sa-text-muted);
+  margin-right: 8px;
+}
+
+.sa-search-input input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: var(--sa-text-main);
+}
+
+.sa-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sa-filter-icon {
+  color: var(--sa-text-muted);
+  font-size: 18px;
+}
+
+.sa-filter-group select {
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--sa-border-main);
+  border-radius: 8px;
+  background-color: var(--sa-bg-card);
+  color: var(--sa-text-main);
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M1.41%200.589996L6%205.17L10.59%200.589996L12%202L6%208L0%202L1.41%200.589996Z%22%20fill%3D%22%2394A3B8%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px;
+}
+
+.sa-table-container {
+  background: var(--sa-bg-card);
+  border-radius: 12px;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
+  overflow-x: auto;
+}
+
+.sa-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.sa-table th {
+  padding: 16px 24px;
+  color: var(--sa-text-muted);
+  font-weight: 500;
+  font-size: 13px;
+  border-bottom: 1px solid var(--sa-border-main);
+  background: var(--sa-bg-table-header);
+}
+.sa-table th:first-child { border-top-left-radius: 12px; }
+.sa-table th:last-child { border-top-right-radius: 12px; }
+
+.sa-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--sa-border-main);
+  color: var(--sa-text-main);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.sa-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badges */
+.sa-plan-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+}
+
+.sa-plan-badge.free {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.sa-plan-badge.starter {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border-color: #bae6fd;
+}
+
+.sa-plan-badge.enterprise {
+  background-color: #ffedd5;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.sa-status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sa-status-badge.active {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.sa-status-badge.suspended {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Dark Mode Overrides for Badges */
+.sa-dark-mode .sa-plan-badge { border-color: var(--sa-border-main); }
+.sa-dark-mode .sa-plan-badge.starter { background-color: rgba(14, 165, 233, 0.15); color: #7dd3fc; }
+.sa-dark-mode .sa-plan-badge.enterprise { background-color: rgba(249, 115, 22, 0.15); color: #fdba74; }
+.sa-dark-mode .sa-plan-badge.free { background-color: rgba(148, 163, 184, 0.1); color: #cbd5e1; }
+
+.sa-dark-mode .sa-status-badge.active { background-color: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); }
+.sa-dark-mode .sa-status-badge.suspended { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+
+.sa-actions-cell {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sa-action-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+.sa-action-link:hover {
+  text-decoration: underline;
+}
+.sa-action-link.warning {
+  color: #f59e0b;
+}

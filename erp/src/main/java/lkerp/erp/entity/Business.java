@@ -20,10 +20,21 @@ public class Business {
     private String name;
     private String currency;
     private String status;
+    private String plan;
+    
+    @Column(name = "owner_email")
+    private String ownerEmail;
+
+    @Column(name = "business_email")
+    private String email;
 
     @Column(name = "created_at")
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "last_active_at")
+    @Builder.Default
+    private LocalDateTime lastActiveAt = LocalDateTime.now();
 
     // Relationships
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL)

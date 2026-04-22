@@ -1,0 +1,104 @@
+/* AdminSettings.css */
+.sa-admin-settings {
+  animation: fadeIn 0.3s ease;
+}
+
+.sa-settings-tabs {
+  margin-bottom: 24px;
+}
+
+.sa-settings-card {
+  background: var(--sa-bg-card);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: var(--sa-shadow-sm);
+  border: 1px solid var(--sa-border-main);
+  max-width: 600px;
+}
+
+.sa-settings-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: var(--sa-text-main);
+}
+
+.sa-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sa-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sa-form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sa-text-muted);
+}
+
+.sa-settings-input {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--sa-border-main);
+  font-size: 14px;
+  outline: none;
+  background-color: var(--sa-bg-input);
+  color: var(--sa-text-main);
+  transition: border-color 0.2s;
+}
+
+.sa-settings-input:focus {
+  border-color: #3b82f6;
+  background-color: var(--sa-bg-card);
+}
+
+.sa-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.sa-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.sa-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.sa-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .sa-slider {
+  background-color: #3b82f6;
+}
+
+input:checked + .sa-slider:before {
+  transform: translateX(20px);
+}

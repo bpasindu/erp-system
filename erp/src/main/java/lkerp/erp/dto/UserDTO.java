@@ -43,4 +43,16 @@ public class UserDTO {
         private boolean isActive;
         private LocalDateTime createdAt;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChangePasswordRequest {
+        @NotBlank(message = "Current password is required")
+        private String currentPassword;
+
+        @NotBlank(message = "New password is required")
+        private String newPassword;
+    }
 }

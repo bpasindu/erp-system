@@ -59,4 +59,18 @@ public class InventoryDTO {
         private Long productId;
         private Integer quantity;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AddStockResponse {
+        private Long movementId;
+        private Long batchId;
+        private Long productId;
+        private Long warehouseId;
+        private Integer quantityAdded;
+        private Integer newWarehouseBalance;
+        private Integer newProductTotalQuantity;
+    }
 }

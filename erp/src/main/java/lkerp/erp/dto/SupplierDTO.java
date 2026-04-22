@@ -17,6 +17,8 @@ public class SupplierDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Request {
+        private Long id; // Used for updates
+
         @NotNull(message = "Business ID is required")
         private Long businessId;
 
@@ -28,6 +30,7 @@ public class SupplierDTO {
 
         private String phone;
         private String address;
+        private String notes;
     }
 
     @Data
@@ -41,6 +44,7 @@ public class SupplierDTO {
         private String email;
         private String phone;
         private String address;
+        private String notes;
         private LocalDateTime createdAt;
     }
 }

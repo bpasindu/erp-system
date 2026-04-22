@@ -1,0 +1,110 @@
+.ledger-page {
+  padding-top: 1.75rem;
+}
+
+.ledger-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.ledger-summary-card {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ledger-summary-card .label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ledger-summary-card .value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.ledger-summary-card.income .value {
+  color: #16a34a;
+}
+
+.ledger-summary-card.expense .value {
+  color: #dc2626;
+}
+
+.ledger-summary-card.net .value {
+  color: var(--text-color);
+}
+
+.ledger-toolbar {
+  margin-bottom: 0.75rem;
+}
+
+.ledger-date-input {
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--input-border);
+  font-size: 0.9rem;
+  background: var(--input-bg);
+  color: var(--input-text);
+}
+
+.ledger-table-wrapper {
+  margin-top: 0.25rem;
+}
+
+.ledger-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.ledger-type.income {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ledger-type.expense {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.amount-income {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.amount-expense {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.ledger-table .cell-actions .icon-button.danger {
+  color: #dc2626;
+}
+
+.product-modal .form-group select,
+.product-modal .form-group input[type='date'] {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .ledger-summary-row {
+    grid-template-columns: 1fr;
+  }
+}
+

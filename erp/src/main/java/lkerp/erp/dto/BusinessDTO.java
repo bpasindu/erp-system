@@ -20,6 +20,12 @@ public class BusinessDTO {
         @NotBlank(message = "Currency is required")
         private String currency;
         private String status;
+        private String plan;
+        @NotBlank(message = "Owner email is required")
+        private String ownerEmail;
+        private String email;
+        @NotBlank(message = "Default password is required")
+        private String defaultPassword;
     }
 
     @Data
@@ -31,6 +37,10 @@ public class BusinessDTO {
         private String name;
         private String currency;
         private String status;
+        private String plan;
+        private String ownerEmail;
+        private String email;
         private LocalDateTime createdAt;
+        private LocalDateTime lastActiveAt;
     }
 }
